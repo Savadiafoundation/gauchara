@@ -18,7 +18,7 @@ const BlogEditor = () => {
         slug: '',
         content: '',
         excerpt: '',
-        featuredImage: '',
+        featured_image: '',
         author: 'Admin',
     });
     const [isLoading, setIsLoading] = useState(false);
@@ -51,20 +51,20 @@ const BlogEditor = () => {
                     slug: blog.slug,
                     content: blog.content,
                     excerpt: blog.excerpt,
-                    featuredImage: blog.featured_image_url || blog.featuredImage,
+                    featured_image: blog.featured_image_url || blog.featured_image,
                     author: typeof blog.author === 'object' ? blog.author.username : (blog.author || 'Admin'),
                 });
 
-                if (blog.featured_image_url || blog.featuredImage) {
+                if (blog.featured_image_url || blog.featured_image) {
                     setUploadType('url');
-                    setImagePreview(blog.featured_image_url || blog.featuredImage);
+                    setImagePreview(blog.featured_image_url || blog.featured_image);
                 }
             } else {
                 toast.error('Blog not found');
                 navigate('/admin/blogs');
             }
-        } catch (error) {
-            toast.error('Failed to fetch blog details');
+        } catch (error: any) {
+            toast.error(error.backendError || 'Failed to fetch blog details');
         } finally {
             setIsFetching(false);
         }
@@ -113,7 +113,7 @@ const BlogEditor = () => {
         } else {
             payload = {
                 ...formData,
-                featured_image_url: formData.featuredImage,
+                featured_image_url: formData.featured_image,
             };
         }
 
@@ -127,7 +127,7 @@ const BlogEditor = () => {
             }
             navigate('/admin/blogs');
         } catch (error: any) {
-            toast.error(error.response?.data?.error || 'Failed to save blog');
+            toast.error(error.backendError || 'Failed to save blog');
         } finally {
             setIsLoading(false);
         }
@@ -195,8 +195,8 @@ const BlogEditor = () => {
                                         <div className="flex items-center gap-2">
                                             <LinkIcon className="w-4 h-4 text-muted-foreground" />
                                             <Input
-                                                name="featuredImage"
-                                                value={formData.featuredImage}
+                                                name="featured_image"
+                                                value={formData.featured_image}
                                                 onChange={(e) => {
                                                     handleChange(e);
                                                     setImagePreview(e.target.value);

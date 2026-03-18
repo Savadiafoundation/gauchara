@@ -1,11 +1,70 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Heart, Users, Mail, Phone, MapPin, Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Heart, Users, Mail, Phone, MapPin, Facebook, Instagram, Twitter, Youtube, Send, Loader2 } from 'lucide-react';
 import PageHero from '@/components/layout/PageHero';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { contactApi } from '@/lib/api';
+import { toast } from 'sonner';
+import { z } from "zod";
+
+const contactSchema = z.object({
+    name: z.string().trim().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
+    email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
+    phone: z.string().trim().regex(/^[0-9]{10,15}$/, "Phone number must be 10-15 digits"),
+    subject: z.string().trim().min(1, "Subject is required").max(200, "Subject must be less than 200 characters"),
+    message: z.string().trim().min(1, "Message is required").max(2000, "Message must be less than 2000 characters"),
+});
 
 const Services = () => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+    });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+        if (errors[name]) {
+            setErrors((prev) => ({ ...prev, [name]: "" }));
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setErrors({});
+
+        const result = contactSchema.safeParse(formData);
+        if (!result.success) {
+            const fieldErrors: Record<string, string> = {};
+            result.error.errors.forEach((err) => {
+                if (err.path[0]) {
+                    fieldErrors[err.path[0] as string] = err.message;
+                }
+            });
+            setErrors(fieldErrors);
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            await contactApi.create(result.data);
+            toast.success("Message Sent Successfully! We'll get back to you soon.");
+            setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+        } catch (error: any) {
+            toast.error(error.backendError || "Failed to send message. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
     return (
         <Layout>
             <PageHero
@@ -158,7 +217,7 @@ const Services = () => {
                                 We welcome volunteers and supporters who share our passion for animal welfare and sustainable practices. Together, we can make a difference.
                             </p>
                             <Button asChild className="btn-primary px-10 py-6 rounded-full text-lg">
-                                <Link to="/contact">
+                                <Link to="/volunteer">
                                     Join as Volunteer
                                 </Link>
                             </Button>
@@ -209,23 +268,82 @@ const Services = () => {
                         </div>
 
                         <div className="bg-card p-10 rounded-3xl shadow-xl border border-border">
-                            <form className="space-y-6">
+                            <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold">Name</label>
-                                        <input type="text" className="w-full px-4 py-3 rounded-xl border border-border focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" placeholder="Your Name" />
+                                        <label className="text-sm font-semibold">Name *</label>
+                                        <Input
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            placeholder="Your Name"
+                                            className={errors.name ? "border-destructive rounded-xl h-12" : "rounded-xl h-12"}
+                                        />
+                                        {errors.name && <p className="text-destructive text-xs">{errors.name}</p>}
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold">Email</label>
-                                        <input type="email" className="w-full px-4 py-3 rounded-xl border border-border focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" placeholder="Your Email" />
+                                        <label className="text-sm font-semibold">Email *</label>
+                                        <Input
+                                            type="email"
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            placeholder="Your Email"
+                                            className={errors.email ? "border-destructive rounded-xl h-12" : "rounded-xl h-12"}
+                                        />
+                                        {errors.email && <p className="text-destructive text-xs">{errors.email}</p>}
                                     </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold">Message</label>
-                                    <textarea rows={4} className="w-full px-4 py-3 rounded-xl border border-border focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none" placeholder="How can we help you?"></textarea>
+
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold">Phone *</label>
+                                        <Input
+                                            name="phone"
+                                            value={formData.phone}
+                                            onChange={handleChange}
+                                            placeholder="Phone Number"
+                                            className={errors.phone ? "border-destructive rounded-xl h-12" : "rounded-xl h-12"}
+                                        />
+                                        {errors.phone && <p className="text-destructive text-xs">{errors.phone}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold">Subject *</label>
+                                        <Input
+                                            name="subject"
+                                            value={formData.subject}
+                                            onChange={handleChange}
+                                            placeholder="How can we help?"
+                                            className={errors.subject ? "border-destructive rounded-xl h-12" : "rounded-xl h-12"}
+                                        />
+                                        {errors.subject && <p className="text-destructive text-xs">{errors.subject}</p>}
+                                    </div>
                                 </div>
-                                <Button className="w-full btn-primary py-6 rounded-xl text-lg">
-                                    Submit Message
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold">Message *</label>
+                                    <Textarea
+                                        name="message"
+                                        value={formData.message}
+                                        onChange={handleChange}
+                                        rows={4}
+                                        className={errors.message ? "border-destructive rounded-xl resize-none" : "rounded-xl resize-none"}
+                                        placeholder="How can we help you?"
+                                    />
+                                    {errors.message && <p className="text-destructive text-xs">{errors.message}</p>}
+                                </div>
+                                <Button type="submit" disabled={isSubmitting} className="w-full btn-primary py-6 rounded-xl text-lg h-14">
+                                    {isSubmitting ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Send className="w-4 h-4 mr-2" />
+                                            Submit Message
+                                        </>
+                                    )}
                                 </Button>
                             </form>
                         </div>

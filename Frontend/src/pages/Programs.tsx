@@ -123,8 +123,8 @@ const Programs = () => {
                                 Donate Now
                             </Link>
                         </Button>
-                        <Button asChild variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-primary px-10 py-7 rounded-full text-lg font-bold transition-all hover:-translate-y-1">
-                            <Link to="/contact">
+                        <Button asChild variant="outline" className="border-2 border-white text-green-700 hover:bg-white hover:text-primary px-10 py-7 rounded-full text-lg font-bold transition-all hover:-translate-y-1">
+                            <Link to="/volunteer">
                                 Join as Volunteer
                             </Link>
                         </Button>

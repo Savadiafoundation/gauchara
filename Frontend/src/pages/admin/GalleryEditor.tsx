@@ -105,8 +105,8 @@ const GalleryEditor = () => {
             if (data.image && (data.image.startsWith('http') || data.image.startsWith('/'))) {
                 setUploadType('url');
             }
-        } catch (error) {
-            toast.error('Failed to fetch gallery details');
+        } catch (error: any) {
+            toast.error(error.backendError || 'Failed to fetch gallery details');
             navigate('/admin/gallery');
         } finally {
             setIsFetching(false);
@@ -163,9 +163,9 @@ const GalleryEditor = () => {
                 toast.success('Gallery item created successfully');
             }
             navigate('/admin/gallery');
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error(isEditing ? 'Failed to update item' : 'Failed to create item');
+            toast.error(error.backendError || (isEditing ? 'Failed to update item' : 'Failed to create item'));
         } finally {
             setIsLoading(false);
         }

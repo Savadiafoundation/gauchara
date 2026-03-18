@@ -8,8 +8,11 @@ import {
   Phone,
   MapPin,
   Heart,
-  ArrowRight
+  ArrowRight,
+  Loader2
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { causeApi } from '@/lib/api';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -18,16 +21,31 @@ const Footer = () => {
     { name: 'About Us', path: '/about' },
     { name: 'Our Causes', path: '/causes' },
     { name: 'Blog', path: '/blog' },
+    { name: 'Volunteer With us', path: '/volunteer' },
     { name: 'Contact', path: '/contact' },
     { name: 'Donate', path: '/donate' },
   ];
 
-  const causes = [
-    { name: 'Cow Shelter', path: '/causes?category=shelter' },
-    { name: 'Medical Care', path: '/causes?category=medical' },
-    { name: 'Fodder Distribution', path: '/causes?category=fodder' },
-    { name: 'Organic Farming', path: '/causes?category=farming' },
-  ];
+  const [dynamicCauses, setDynamicCauses] = useState<any[]>([]);
+  const [isLoadingCauses, setIsLoadingCauses] = useState(true);
+
+  useEffect(() => {
+    const fetchRecentCauses = async () => {
+      try {
+        const response = await causeApi.getAll();
+        // Sort by date and take latest 5
+        const recent = response.data
+          .sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+          .slice(0, 5);
+        setDynamicCauses(recent);
+      } catch (error) {
+        console.error("Failed to fetch causes for footer", error);
+      } finally {
+        setIsLoadingCauses(false);
+      }
+    };
+    fetchRecentCauses();
+  }, []);
 
   const socialLinks = [
     { icon: Facebook, href: 'https://facebook.com/gauchara', label: 'Facebook' },
@@ -98,19 +116,28 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-bold text-white mb-6">Our Causes</h4>
             <ul className="space-y-3">
-              {causes.map((cause) => (
-                <li key={cause.path}>
-                  <Link
-                    to={cause.path}
-                    className="text-muted-foreground hover:text-primary transition-colors 
-                             flex items-center gap-2 group"
-                  >
-                    <ArrowRight className="w-4 h-4 opacity-0 -ml-6 group-hover:opacity-100 
-                                         group-hover:ml-0 transition-all" />
-                    {cause.name}
-                  </Link>
+              {isLoadingCauses ? (
+                <li className="flex items-center gap-2 text-muted-foreground/50 italic text-sm">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Syncing missions...
                 </li>
-              ))}
+              ) : dynamicCauses.length === 0 ? (
+                <li className="text-muted-foreground/50 italic text-sm">No active causes yet.</li>
+              ) : (
+                dynamicCauses.map((cause) => (
+                  <li key={cause.id || cause._id}>
+                    <Link
+                      to={`/causes`} // Or map to a specific cause page if it exists
+                      className="text-muted-foreground hover:text-primary transition-colors 
+                               flex items-center gap-2 group"
+                    >
+                      <ArrowRight className="w-4 h-4 opacity-0 -ml-6 group-hover:opacity-100 
+                                           group-hover:ml-0 transition-all shrink-0" />
+                      <span className="truncate">{cause.title}</span>
+                    </Link>
+                  </li>
+                ))
+              )}
             </ul>
           </div>
 

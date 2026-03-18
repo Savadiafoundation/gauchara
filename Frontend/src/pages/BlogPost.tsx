@@ -1,46 +1,60 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar, User, ArrowLeft, Tag, Share2, Facebook, Twitter } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { Calendar, User, ArrowLeft, Tag, Share2, Facebook, Twitter, Loader2 } from "lucide-react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
-import cowHerd from "@/assets/cow-herd.jpg";
+import { blogApi } from "@/lib/api";
+import { getImageUrl } from "@/lib/utils";
+import { toast } from "sonner";
 
 const BlogPost = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const [post, setPost] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // In a real app, this would fetch the post based on ID
-  const post = {
-    id: 1,
-    title: "Welcome to GauChara Blog",
-    content: `Welcome to WordPress. This is your first post. Edit or delete it, then start writing!
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        setIsLoading(true);
+        // Using getBySlug first, fallback to getById if needed
+        const response = await blogApi.getBySlug(slug!);
+        setPost(response.data);
+      } catch (error: any) {
+        console.error("Failed to fetch blog post:", error);
+        toast.error("Failed to load article");
+        navigate("/blog");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (slug) fetchPost();
+  }, [slug]);
 
-At GauChara, we are excited to share our journey with you through this blog. Here, you'll find updates about our cow welfare initiatives, success stories from our gaushalas, educational content about Bos Indicus cow care, and ways you can get involved in our sacred mission.
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
 
-## Our Mission
+  if (!post) return null;
 
-GauChara is a sacred initiative of the Savadia Foundation, dedicated to the nourishment and welfare of Bos Indicus cows across India. Through comprehensive programs including nutritious silage distribution, veterinary care, and gaushala support, we work tirelessly to ensure that every sacred cow receives the care she deserves.
+  const displayDate = post.created_at 
+    ? new Date(post.created_at).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    : "Recent Post";
 
-## What to Expect
-
-In the coming weeks and months, we'll be sharing:
-
-- **Impact Stories**: Real accounts of how your donations are making a difference
-- **Educational Content**: Learn about cow nutrition, health, and sustainable farming
-- **Event Updates**: Stay informed about our activities and how you can participate
-- **Volunteer Spotlights**: Meet the dedicated individuals who make our work possible
-
-## Join Us
-
-We invite you to be part of this sacred journey. Whether through donations, volunteering, or simply spreading awareness, every contribution matters. Together, we can ensure that Gaumata receives the love, care, and nourishment she deserves.
-
-Thank you for your support.
-
-🙏 Jai Gaumata!`,
-    image: cowHerd,
-    author: "GauChara Team",
-    date: "January 8, 2026",
-    category: "Announcements",
-  };
+  const authorName = post.author 
+    ? (typeof post.author === 'object' ? (post.author.username || 'GauChara Admin') : post.author) 
+    : 'GauChara Admin';
 
   return (
     <Layout>
@@ -62,11 +76,11 @@ Thank you for your support.
             <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
               <span className="flex items-center gap-1">
                 <Tag className="w-4 h-4" />
-                {post.category}
+                {post.category || 'General'}
               </span>
               <span className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                {post.date}
+                {displayDate}
               </span>
             </div>
 
@@ -80,7 +94,7 @@ Thank you for your support.
                   <User className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <div className="font-medium text-foreground">{post.author}</div>
+                  <div className="font-medium text-foreground">{authorName}</div>
                   <div className="text-sm text-muted-foreground">Author</div>
                 </div>
               </div>
@@ -98,7 +112,7 @@ Thank you for your support.
             className="rounded-2xl overflow-hidden"
           >
             <img
-              src={post.image}
+              src={getImageUrl(post.featured_image || post.featured_image_url || post.image) || '/placeholder.svg'}
               alt={post.title}
               className="w-full h-[400px] md:h-[500px] object-cover"
             />

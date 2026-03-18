@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { blogApi } from '@/lib/api';
+import { getImageUrl } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Plus, Pencil, Trash2, Loader2, ArrowLeft } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
     Table,
@@ -31,7 +32,8 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Check, Eye } from 'lucide-react';
+import { Eye, Calendar, Users } from 'lucide-react';
+import AdminLayout from '@/components/layout/AdminLayout';
 
 const ManageBlogs = () => {
     const [blogs, setBlogs] = useState<any[]>([]);
@@ -47,8 +49,8 @@ const ManageBlogs = () => {
         try {
             const response = await blogApi.getAll();
             setBlogs(response.data);
-        } catch (error) {
-            toast.error('Failed to fetch blogs');
+        } catch (error: any) {
+            toast.error(error.backendError || 'Failed to fetch blogs');
         } finally {
             setIsLoading(false);
         }
@@ -59,8 +61,8 @@ const ManageBlogs = () => {
             await blogApi.delete(id);
             setBlogs(blogs.filter(blog => (blog.id || blog._id) !== id));
             toast.success('Blog deleted successfully');
-        } catch (error) {
-            toast.error('Failed to delete blog');
+        } catch (error: any) {
+            toast.error(error.backendError || 'Failed to delete blog');
         }
     };
 
@@ -70,176 +72,180 @@ const ManageBlogs = () => {
     };
 
     return (
-        <div className="min-h-screen bg-muted/30 p-8">
-            <div className="max-w-6xl mx-auto">
-                <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-4">
-                        <Button variant="outline" size="icon" asChild>
-                            <Link to="/admin/dashboard">
-                                <ArrowLeft className="w-4 h-4" />
-                            </Link>
-                        </Button>
-                        <div>
-                            <h1 className="text-3xl font-bold">Manage Blogs</h1>
-                            <p className="text-muted-foreground">Create, edit, and remove blog posts</p>
-                        </div>
-                    </div>
-                    <Button asChild>
-                        <Link to="/admin/blogs/new">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Create New
-                        </Link>
-                    </Button>
+        <AdminLayout title="Manage Blogs">
+            <div className="flex items-center justify-between mb-10">
+                <div>
+                    <h1 className="text-3xl font-black tracking-tight text-foreground">Content Strategy</h1>
+                    <p className="text-muted-foreground text-sm font-medium">Create and refine your foundation's stories.</p>
                 </div>
-
-                <div className="bg-background rounded-xl border shadow-sm overflow-hidden">
-                    {isLoading ? (
-                        <div className="flex justify-center p-12">
-                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                        </div>
-                    ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Image</TableHead>
-                                    <TableHead>Title</TableHead>
-                                    <TableHead>Author</TableHead>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {blogs.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
-                                            No blogs found. Create your first one!
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    blogs.map((blog) => {
-                                        const imageUrl = blog.featured_image
-                                            ? (blog.featured_image.startsWith('http') ? blog.featured_image : `http://127.0.0.1:8000${blog.featured_image}`)
-                                            : blog.featured_image_url
-                                                ? (blog.featured_image_url.startsWith('http') ? blog.featured_image_url : `http://127.0.0.1:8000${blog.featured_image_url}`)
-                                                : '/placeholder.svg';
-
-                                        return (
-                                            <TableRow key={blog.id || blog._id} className="cursor-pointer hover:bg-muted/50" onClick={() => openViewModal(blog)}>
-                                                <TableCell>
-                                                    <div className="w-16 h-10 rounded overflow-hidden bg-muted">
-                                                        <img
-                                                            src={imageUrl}
-                                                            alt={blog.title}
-                                                            className="w-full h-full object-cover"
-                                                            onError={(e) => {
-                                                                e.currentTarget.onerror = null;
-                                                                e.currentTarget.src = '/placeholder.svg';
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="font-medium max-w-[200px] truncate">{blog.title}</TableCell>
-                                                <TableCell>{typeof blog.author === 'object' ? (blog.author.username || 'Admin') : blog.author}</TableCell>
-                                                <TableCell>{new Date(blog.created_at || blog.createdAt).toLocaleDateString()}</TableCell>
-                                                <TableCell className="text-right">
-                                                    <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                                                        <Button variant="ghost" size="icon" onClick={() => openViewModal(blog)}>
-                                                            <Eye className="w-4 h-4 text-muted-foreground" />
-                                                        </Button>
-                                                        <Button variant="ghost" size="icon" asChild>
-                                                            <Link to={`/admin/blogs/edit/${blog.id || blog._id}`}>
-                                                                <Pencil className="w-4 h-4 text-blue-500" />
-                                                            </Link>
-                                                        </Button>
-
-                                                        <AlertDialog>
-                                                            <AlertDialogTrigger asChild>
-                                                                <Button variant="ghost" size="icon">
-                                                                    <Trash2 className="w-4 h-4 text-red-500" />
-                                                                </Button>
-                                                            </AlertDialogTrigger>
-                                                            <AlertDialogContent>
-                                                                <AlertDialogHeader>
-                                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                                    <AlertDialogDescription>
-                                                                        This action cannot be undone. This will permanently delete the blog post.
-                                                                    </AlertDialogDescription>
-                                                                </AlertDialogHeader>
-                                                                <AlertDialogFooter>
-                                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                    <AlertDialogAction onClick={() => handleDelete(blog.id || blog._id)} className="bg-red-500 hover:bg-red-600">
-                                                                        Delete
-                                                                    </AlertDialogAction>
-                                                                </AlertDialogFooter>
-                                                            </AlertDialogContent>
-                                                        </AlertDialog>
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })
-                                )}
-                            </TableBody>
-                        </Table>
-                    )}
-                </div>
+                <Button asChild className="rounded-2xl h-12 shadow-xl shadow-primary/20 hover:shadow-primary/30 group">
+                    <Link to="/admin/blogs/new">
+                        <Plus className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                        New Story
+                    </Link>
+                </Button>
             </div>
 
-            {/* View Details Modal */}
-            <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle>Blog Details</DialogTitle>
-                        <DialogDescription>
-                            Full content of the blog post
-                        </DialogDescription>
-                    </DialogHeader>
+            <div className="bg-background rounded-[40px] border border-border/50 shadow-sm overflow-hidden">
+                {isLoading ? (
+                    <div className="flex justify-center p-24">
+                        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                    </div>
+                ) : (
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="border-b border-border/50 hover:bg-transparent px-6">
+                                <TableHead className="pl-10 font-black uppercase text-[10px] tracking-widest h-16">Visual</TableHead>
+                                <TableHead className="font-black uppercase text-[10px] tracking-widest h-16">Headline</TableHead>
+                                <TableHead className="font-black uppercase text-[10px] tracking-widest h-16">Curator</TableHead>
+                                <TableHead className="font-black uppercase text-[10px] tracking-widest h-16">Publication</TableHead>
+                                <TableHead className="text-right pr-10 font-black uppercase text-[10px] tracking-widest h-16">Management</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {blogs.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center py-24 text-muted-foreground italic font-medium">
+                                        The archive is currently empty.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                blogs.map((blog) => {
+                                    const imageDisplayUrl = getImageUrl(blog.featured_image || blog.featured_image_url) || '/placeholder.svg';
 
-                    {selectedBlog && (
-                        <div className="space-y-6 pt-4">
-                            {/* Header Info */}
-                            <div className="flex flex-col md:flex-row gap-4 justify-between items-start border-b pb-4">
-                                <div>
-                                    <h3 className="text-xl font-bold">{selectedBlog.title}</h3>
-                                    <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                                        <span>By {typeof selectedBlog.author === 'object' ? (selectedBlog.author.username || 'Admin') : selectedBlog.author}</span>
-                                        <span>•</span>
-                                        <span>{new Date(selectedBlog.created_at || selectedBlog.createdAt).toLocaleDateString()}</span>
-                                    </div>
-                                    <div className="mt-2 text-xs text-muted-foreground">
-                                        Slug: {selectedBlog.slug}
-                                    </div>
-                                </div>
-                            </div>
+                                    let displayDate = "N/A";
+                                    const rawDate = blog.created_at || blog.createdAt || blog.pub_date || blog.updated_at || blog.date || blog.timestamp;
 
-                            {/* Image */}
-                            <div className="rounded-xl overflow-hidden border bg-muted w-full aspect-video">
-                                <img
-                                    src={selectedBlog.featured_image
-                                        ? (selectedBlog.featured_image.startsWith('http') ? selectedBlog.featured_image : `http://127.0.0.1:8000${selectedBlog.featured_image}`)
-                                        : selectedBlog.featured_image_url
-                                            ? (selectedBlog.featured_image_url.startsWith('http') ? selectedBlog.featured_image_url : `http://127.0.0.1:8000${selectedBlog.featured_image_url}`)
-                                            : '/placeholder.svg'
+                                    if (rawDate) {
+                                        const d = new Date(rawDate);
+                                        if (!isNaN(d.getTime())) {
+                                            displayDate = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                                        }
                                     }
+
+                                    return (
+                                        <TableRow key={blog.id || blog._id} className="cursor-pointer hover:bg-muted/10 transition-colors group px-6 border-b border-border/30" onClick={() => openViewModal(blog)}>
+                                            <TableCell className="pl-10 py-6">
+                                                <div className="w-20 h-14 rounded-2xl overflow-hidden bg-muted group-hover:scale-105 transition-transform duration-500 shadow-sm border border-border/50">
+                                                    <img
+                                                        src={imageDisplayUrl}
+                                                        alt={blog.title}
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            e.currentTarget.onerror = null;
+                                                            e.currentTarget.src = '/placeholder.svg';
+                                                        }}
+                                                    />
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="font-black text-sm max-w-[300px] truncate tracking-tight text-foreground pr-4">
+                                                {blog.title}
+                                            </TableCell>
+                                            <TableCell className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                                                {typeof blog.author === 'object' ? (blog.author.username || 'Admin') : blog.author || 'Foundation'}
+                                            </TableCell>
+                                            <TableCell className="text-xs font-bold text-muted-foreground">
+                                                <div className="flex items-center gap-2">
+                                                    <Calendar className="w-3.5 h-3.5 text-primary/40" />
+                                                    {displayDate}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right pr-10">
+                                                <div className="flex justify-end gap-3" onClick={(e) => e.stopPropagation()}>
+                                                    <Button variant="ghost" size="icon" className="rounded-xl hover:bg-primary/5 group/btn" onClick={() => openViewModal(blog)}>
+                                                        <Eye className="w-4 h-4 text-muted-foreground group-hover/btn:text-primary transition-colors" />
+                                                    </Button>
+                                                    <Button variant="ghost" size="icon" className="rounded-xl hover:bg-blue-50 group/btn" asChild>
+                                                        <Link to={`/admin/blogs/edit/${blog.id || blog._id}`}>
+                                                            <Pencil className="w-4 h-4 text-blue-400 group-hover/btn:text-blue-600 transition-colors" />
+                                                        </Link>
+                                                    </Button>
+
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-red-50 group/btn">
+                                                                <Trash2 className="w-4 h-4 text-red-400 group-hover/btn:text-red-600 transition-colors" />
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent className="rounded-[40px] border-none shadow-2xl p-10">
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle className="text-2xl font-black tracking-tight">Erase Entry?</AlertDialogTitle>
+                                                                <AlertDialogDescription className="text-muted-foreground font-medium pt-2">
+                                                                    This digital story will be permanently removed from the GauChara archives.
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter className="pt-6">
+                                                                <AlertDialogCancel className="rounded-2xl h-12 font-bold px-8 border-2">Keep Entry</AlertDialogCancel>
+                                                                <AlertDialogAction onClick={() => handleDelete(blog.id || blog._id)} className="bg-red-500 hover:bg-red-600 rounded-2xl h-12 font-bold px-8 shadow-xl shadow-red-500/20">
+                                                                    Erase Forever
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })
+                            )}
+                        </TableBody>
+                    </Table>
+                )}
+            </div>
+
+            <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[40px] border-none shadow-2xl p-0">
+                    {selectedBlog && (
+                        <div className="space-y-0">
+                            <div className="relative aspect-video w-full">
+                                <img
+                                    src={getImageUrl(selectedBlog.featured_image || selectedBlog.featured_image_url) || '/placeholder.svg'}
                                     alt={selectedBlog.title}
                                     className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                        e.currentTarget.src = '/placeholder.svg';
-                                    }}
                                 />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-12">
+                                    <div className="space-y-4">
+                                        <Badge className="bg-primary hover:bg-primary text-white border-none px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/30">Official Release</Badge>
+                                        <h3 className="text-3xl font-black text-white italic tracking-tight">{selectedBlog.title}</h3>
+                                    </div>
+                                </div>
                             </div>
 
-                            {/* Content */}
-                            <div className="space-y-4">
-                                <div>
-                                    <h4 className="font-semibold mb-1">Excerpt</h4>
-                                    <p className="text-muted-foreground bg-muted/30 p-3 rounded-md text-sm italic">
-                                        {selectedBlog.excerpt || "No excerpt provided."}
-                                    </p>
+                            <div className="p-12 space-y-10">
+                                <div className="flex flex-wrap gap-8 items-center justify-between pb-8 border-b border-border/50">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
+                                            <Calendar className="w-6 h-6 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-0.5">Release Date</p>
+                                            <p className="font-bold text-foreground">
+                                                {(() => {
+                                                    const d = new Date(selectedBlog.created_at || selectedBlog.pub_date || selectedBlog.date);
+                                                    return isNaN(d.getTime()) ? "Date Pending" : d.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+                                                })()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
+                                            <Users className="w-6 h-6 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-0.5">Author</p>
+                                            <p className="font-bold text-foreground">{typeof selectedBlog.author === 'object' ? (selectedBlog.author.username || 'Admin') : selectedBlog.author || 'Foundation'}</p>
+                                        </div>
+                                    </div>
+                                    <Button variant="outline" className="rounded-2xl h-12 px-6 border-2 font-black text-xs uppercase tracking-widest" asChild>
+                                        <Link to={`/admin/blogs/edit/${selectedBlog.id || selectedBlog._id}`}>Edit Post</Link>
+                                    </Button>
                                 </div>
-                                <div>
-                                    <h4 className="font-semibold mb-1">Content</h4>
-                                    <div className="prose prose-sm max-w-none bg-muted/30 p-4 rounded-md">
+
+                                <div className="space-y-10">
+                                    <div className="p-8 bg-muted/40 rounded-[32px] border border-border/50 italic text-muted-foreground font-medium text-lg leading-relaxed relative quote-mask">
+                                        "{selectedBlog.excerpt || "No summary provided for this entry."}"
+                                    </div>
+                                    <div className="prose prose-stone max-w-none text-foreground font-medium leading-relaxed">
                                         <div className="whitespace-pre-wrap">{selectedBlog.content}</div>
                                     </div>
                                 </div>
@@ -248,8 +254,9 @@ const ManageBlogs = () => {
                     )}
                 </DialogContent>
             </Dialog>
-        </div>
+        </AdminLayout>
     );
 };
 
 export default ManageBlogs;
+

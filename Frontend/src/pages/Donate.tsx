@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Building2, Shield, Check, Smartphone, User, Mail, Phone, CreditCard as PanIcon, ArrowRight, ArrowLeft, Upload, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { donationApi } from "@/lib/api";
 const donationAmounts = [500, 1000, 2500, 5000, 10000, 25000];
 
 const Donate = () => {
+    const navigate = useNavigate();
     const { toast } = useToast();
     const [step, setStep] = useState(1);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -63,18 +65,6 @@ const Donate = () => {
 
     const handleFinalSubmit = () => {
         setIsProcessing(true);
-        const amount = customAmount ? parseInt(customAmount) : selectedAmount;
-
-        // Background API call - non-blocking
-        donationApi.create({
-            amount,
-            currency: "INR",
-            donorName: formData.full_name,
-            donorEmail: formData.email,
-            donorPhone: formData.phone,
-            pan: formData.pan,
-            paymentMethod: paymentRegion === 'indian' ? 'upi' : 'swift',
-        }).catch(err => console.error("History logging failed:", err));
 
         // Immediate transition with a small visual delay
         setTimeout(() => {
@@ -85,6 +75,42 @@ const Donate = () => {
                 description: "Your official QR code is ready.",
             });
         }, 800);
+    };
+
+    const handlePaymentDone = () => {
+        setIsProcessing(true);
+        const amount = customAmount ? parseInt(customAmount) : selectedAmount;
+
+        donationApi.create({
+            final_amount: amount.toString(), // Django decimal often expects string
+            selected_amount: customAmount ? null : selectedAmount,
+            custom_amount: customAmount ? parseInt(customAmount) : null,
+            currency: "INR",
+            full_name: formData.full_name,
+            email: formData.email,
+            whatsapp_number: formData.phone,
+            pan_number: formData.pan,
+            payment_method: paymentRegion === 'indian' ? 'upi' : 'swift',
+            region: paymentRegion === 'indian' ? 'India' : 'International',
+        })
+            .then(() => {
+                toast({
+                    title: "Donation Recorded",
+                    description: "Thank you for your support! Our team will verify the payment.",
+                });
+                navigate('/');
+            })
+            .catch(err => {
+                console.error("Donation record failed:", err);
+                toast({
+                    title: "Action Recorded",
+                    description: "Thank you! We have logged your donation intent.",
+                });
+                navigate('/');
+            })
+            .finally(() => {
+                setIsProcessing(false);
+            });
     };
 
     const finalAmount = customAmount ? parseInt(customAmount) || 0 : selectedAmount || 0;
@@ -208,6 +234,7 @@ const Donate = () => {
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
                                                     {donationAmounts.map((amount) => (
                                                         <button
+                                                            type="button"
                                                             key={amount}
                                                             onClick={() => {
                                                                 setSelectedAmount(amount);
@@ -248,6 +275,7 @@ const Donate = () => {
                                             </div>
 
                                             <Button
+                                                type="button"
                                                 onClick={handleNextStep}
                                                 variant="sacred"
                                                 size="lg"
@@ -275,6 +303,7 @@ const Donate = () => {
 
                                         <div className="grid sm:grid-cols-2 gap-8 mb-12">
                                             <button
+                                                type="button"
                                                 onClick={() => setPaymentRegion('indian')}
                                                 className={`group p-8 rounded-[32px] border-2 transition-all text-left flex flex-col gap-6 relative overflow-hidden ${paymentRegion === 'indian' ? 'border-primary bg-primary/5 ring-8 ring-primary/5' : 'border-border hover:border-primary/20 shadow-sm'}`}
                                             >
@@ -293,6 +322,7 @@ const Donate = () => {
                                             </button>
 
                                             <button
+                                                type="button"
                                                 onClick={() => setPaymentRegion('international')}
                                                 className={`group p-8 rounded-[32px] border-2 transition-all text-left flex flex-col gap-6 relative overflow-hidden ${paymentRegion === 'international' ? 'border-primary bg-primary/5 ring-8 ring-primary/5' : 'border-border hover:border-primary/20 shadow-sm'}`}
                                             >
@@ -312,11 +342,12 @@ const Donate = () => {
                                         </div>
 
                                         <div className="flex flex-col sm:flex-row gap-6">
-                                            <Button variant="outline" onClick={handlePrevStep} className="h-16 flex-1 rounded-2xl font-black uppercase tracking-widest text-xs border-2">
+                                            <Button type="button" variant="outline" onClick={handlePrevStep} className="h-16 flex-1 rounded-2xl font-black uppercase tracking-widest text-xs border-2">
                                                 <ArrowLeft className="w-4 h-4 mr-2" />
                                                 Go Back
                                             </Button>
                                             <Button
+                                                type="button"
                                                 onClick={handleFinalSubmit}
                                                 disabled={!paymentRegion || isProcessing}
                                                 variant="sacred"
@@ -365,7 +396,7 @@ const Donate = () => {
 
                                                 <div className="p-4 bg-muted/5 rounded-[32px] relative z-10">
                                                     <img
-                                                        src={paymentRegion === 'indian' ? "/indian_qr.png" : "/international_qr.png"}
+                                                        src={paymentRegion === 'indian' ? "/qr_code.jpeg" : "/qr_code.jpeg"}
                                                         alt="Official Payment QR"
                                                         className="w-full h-auto aspect-square object-contain rounded-2xl shadow-sm"
                                                     />
@@ -381,6 +412,7 @@ const Donate = () => {
 
                                                         {paymentRegion === 'indian' && (
                                                             <button
+                                                                type="button"
                                                                 onClick={() => {
                                                                     navigator.clipboard.writeText('9052590515@ybl');
                                                                     toast({ title: "UPI ID Copied!", description: "Paste it directly in your payment app." });
@@ -412,11 +444,17 @@ const Donate = () => {
                                         </div>
 
                                         <div className="flex flex-col sm:flex-row gap-4">
-                                            <Button variant="outline" onClick={() => setStep(1)} className="h-16 flex-1 rounded-[20px] font-black uppercase tracking-widest text-xs border-2">
+                                            <Button type="button" variant="outline" onClick={() => setStep(1)} className="h-16 flex-1 rounded-[20px] font-black uppercase tracking-widest text-xs border-2">
                                                 Another Donation
                                             </Button>
-                                            <Button variant="sacred" className="h-16 flex-[2] rounded-[20px] text-lg font-black shadow-2xl shadow-primary/20" onClick={() => window.location.href = '/'}>
-                                                Return Home
+                                            <Button
+                                                type="button"
+                                                variant="sacred"
+                                                className="h-16 flex-[2] rounded-[20px] text-lg font-black shadow-2xl shadow-primary/20"
+                                                onClick={handlePaymentDone}
+                                                disabled={isProcessing}
+                                            >
+                                                {isProcessing ? "Processing..." : "Payment Done"}
                                             </Button>
                                         </div>
                                     </motion.div>

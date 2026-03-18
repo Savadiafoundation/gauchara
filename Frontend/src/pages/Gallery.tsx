@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { getImageUrl } from "@/lib/utils";
 import Layout from "@/components/layout/Layout";
 import PageHero from "@/components/layout/PageHero";
 import { galleryApi, categoryApi } from "@/lib/api";
@@ -22,7 +23,7 @@ const Gallery = () => {
 
         // Transform gallery data
         const formattedImages = galleryRes.data.map((item: any) => ({
-          src: item.image ? (item.image.startsWith('http') ? item.image : `http://127.0.0.1:8000${item.image}`) : '/placeholder.svg',
+          src: getImageUrl(item.image) || '/placeholder.svg',
           alt: item.caption || item.description || "Gallery Image",
           caption: item.caption,
           category_name: item.category_name

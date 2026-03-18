@@ -38,7 +38,7 @@ const AdminLogin = () => {
             toast.success('Welcome back, Admin!');
             navigate('/admin/dashboard');
         } catch (error: any) {
-            toast.error(error.response?.data?.error || 'Login failed. Please check your credentials.');
+            toast.error(error.backendError || 'Login failed. Please check your credentials.');
         } finally {
             setIsLoading(false);
         }

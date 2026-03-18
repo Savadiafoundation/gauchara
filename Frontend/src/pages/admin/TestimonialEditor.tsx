@@ -91,9 +91,9 @@ const TestimonialEditor = () => {
                 toast.error('Testimonial not found');
                 navigate('/admin/testimonials');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error('Failed to fetch testimonial details');
+            toast.error(error.backendError || 'Failed to fetch testimonial details');
         } finally {
             setIsFetching(false);
         }
@@ -150,7 +150,7 @@ const TestimonialEditor = () => {
             }
             navigate('/admin/testimonials');
         } catch (error: any) {
-            toast.error(error.response?.data?.error || 'Failed to save testimonial');
+            toast.error(error.backendError || 'Failed to save testimonial');
         } finally {
             setIsLoading(false);
         }

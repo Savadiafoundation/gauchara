@@ -60,8 +60,8 @@ const ProgramEditor = () => {
                 setUploadType('url');
             }
 
-        } catch (error) {
-            toast.error('Failed to fetch program details');
+        } catch (error: any) {
+            toast.error(error.backendError || 'Failed to fetch program details');
             navigate('/admin/programs');
         } finally {
             setIsFetching(false);
@@ -119,7 +119,7 @@ const ProgramEditor = () => {
             navigate('/admin/programs');
         } catch (error: any) {
             console.error(error);
-            toast.error(error.response?.data?.message || 'Failed to save program');
+            toast.error(error.backendError || 'Failed to save program');
         } finally {
             setIsLoading(false);
         }

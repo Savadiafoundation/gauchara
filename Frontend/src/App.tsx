@@ -26,6 +26,9 @@ import GalleryEditor from "./pages/admin/GalleryEditor";
 import ManageCategories from "./pages/admin/ManageCategories";
 import ManagePrograms from "./pages/admin/ManagePrograms";
 import ProgramEditor from "./pages/admin/ProgramEditor";
+import ManageContacts from "./pages/admin/ManageContacts";
+import ManageVolunteers from "./pages/admin/ManageVolunteers";
+import ManageDonations from "./pages/admin/ManageDonations";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/layout/ScrollToTop";
 
@@ -77,6 +80,10 @@ const App = () => {
             <Route path="/admin/programs" element={<ManagePrograms />} />
             <Route path="/admin/programs/new" element={<ProgramEditor />} />
             <Route path="/admin/programs/edit/:id" element={<ProgramEditor />} />
+
+            <Route path="/admin/contacts" element={<ManageContacts />} />
+            <Route path="/admin/volunteers" element={<ManageVolunteers />} />
+            <Route path="/admin/donations" element={<ManageDonations />} />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

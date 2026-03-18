@@ -7,6 +7,7 @@ import Layout from "@/components/layout/Layout";
 import PageHero from "@/components/layout/PageHero";
 import { blogApi } from "@/lib/api";
 import { toast } from "sonner";
+import { getImageUrl } from "@/lib/utils";
 
 const Blog = () => {
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
@@ -20,33 +21,38 @@ const Blog = () => {
         console.log("Blog API Response:", response.data);
 
         // Map backend data to frontend structure if needed
-        const formattedPosts = response.data.map((post: any) => ({
-          ...post,
-          id: post.id || post._id,
-          // Handle image: check for featured_image_url, featuredImage, featured_image, or fall back to placeholder
-          image: post.featured_image ? (post.featured_image.startsWith('http') ? post.featured_image : `http://127.0.0.1:8000${post.featured_image}`)
-            : post.featured_image_url ? (post.featured_image_url.startsWith('http') ? post.featured_image_url : `http://127.0.0.1:8000${post.featured_image_url}`)
-              : '/placeholder.svg',
+        const formattedPosts = response.data.map((post: any) => {
+          // Robust date parsing
+          let displayDate = "Pending";
+          const rawDate = post.created_at || post.createdAt || post.date;
+          if (rawDate) {
+            const dateObj = new Date(rawDate);
+            if (!isNaN(dateObj.getTime())) {
+              displayDate = dateObj.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              });
+            }
+          }
 
-          title: post.title || "Untitled Post",
-          excerpt: post.excerpt || "No excerpt available",
-
-          // Handle Date
-          date: new Date(post.created_at || post.createdAt || Date.now()).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          }),
-
-          category: post.category || 'General',
-
-          // Handle Author: it can be an object or a string or null
-          author: post.author ? (typeof post.author === 'object' ? (post.author.username || 'Admin') : post.author) : 'Admin'
-        }));
+          return {
+            ...post,
+            id: post.id || post._id,
+            // Use getImageUrl utility for robust URL construction
+            image: getImageUrl(post.featured_image || post.featured_image_url) || '/placeholder.svg',
+            title: post.title || "Untitled Post",
+            excerpt: post.excerpt || "No excerpt available",
+            date: displayDate,
+            category: post.category || 'General',
+            // Handle Author: it can be an object or a string or null
+            author: post.author ? (typeof post.author === 'object' ? (post.author.username || 'Admin') : post.author) : 'Admin'
+          };
+        });
         setBlogPosts(formattedPosts);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Failed to fetch blogs:", error);
-        toast.error("Failed to load blog posts");
+        toast.error(error.backendError || "Failed to load blog posts");
       } finally {
         setIsLoading(false);
       }

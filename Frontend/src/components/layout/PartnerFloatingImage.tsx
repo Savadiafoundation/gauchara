@@ -2,13 +2,13 @@ import React from 'react';
 
 const PartnerFloatingImage = () => {
     return (
-        <div className="fixed right-4 top-32 z-40 group">
-            <div className="relative p-1 rounded-2xl bg-black/10 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-500 hover:scale-110 hover:bg-black/40 hover:border-white/20">
-                <div className="relative w-auto h-32 md:w-36 md:h-36 overflow-hidden rounded-xl">
+        <div className="fixed right-6 top-32 z-40 group">
+            <div className="relative p-1.5 rounded-[32px] bg-black/5 backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.2)] transition-all duration-700 hover:scale-105 hover:bg-white/10 hover:border-primary/20 group">
+                <div className="relative w-auto h-48 md:h-56 overflow-hidden rounded-[24px]">
                     <img
                         src="/partner.png"
                         alt="Partner"
-                        className="w-full h-full object-contain p-2"
+                        className="w-full h-full object-contain p-3 drop-shadow-2xl"
                     />
                 </div>
 

@@ -58,8 +58,8 @@ const CauseEditor = () => {
             if (response.data.image || response.data.image_file) {
                 setPreviewUrl(getImageUrl(response.data.image_file || response.data.image || response.data.image_url));
             }
-        } catch (error) {
-            toast.error('Failed to fetch cause details');
+        } catch (error: any) {
+            toast.error(error.backendError || 'Failed to fetch cause details');
             navigate('/admin/causes');
         } finally {
             setIsFetching(false);
@@ -79,7 +79,11 @@ const CauseEditor = () => {
         if (!newCategoryName.trim()) return;
         try {
             const res = await causeCategoryApi.create({ name: newCategoryName });
-            setCategories(prev => [...prev, res.data]);
+            // Re-fetch all categories to ensure state is perfectly synced with backend
+            const updatedCategories = await causeCategoryApi.getAll();
+            setCategories(updatedCategories.data);
+            
+            // Explicitly set the new category as selected
             setFormData(prev => ({ ...prev, category: res.data.name }));
             setNewCategoryName('');
             toast.success("Category added!");
@@ -157,7 +161,7 @@ const CauseEditor = () => {
             }
             navigate('/admin/causes');
         } catch (error: any) {
-            toast.error(error.response?.data?.error || 'Failed to save cause');
+            toast.error(error.backendError || 'Failed to save cause');
         } finally {
             setIsLoading(false);
         }

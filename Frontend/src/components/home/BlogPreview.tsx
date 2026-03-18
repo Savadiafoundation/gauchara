@@ -1,39 +1,32 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Calendar, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-// Mock data - will be replaced with API data
-const mockBlogs = [
-  {
-    id: '1',
-    slug: 'importance-of-desi-cows',
-    title: 'The Importance of Desi Cows in Agriculture',
-    excerpt: 'Discover how indigenous cow breeds are essential for sustainable and organic farming practices.',
-    image: '/hero-10.png',
-    author: 'Dr. Rajesh Kumar',
-    createdAt: '2024-01-15',
-  },
-  {
-    id: '2',
-    slug: 'success-story-rescued-gaumata',
-    title: 'Success Story: A New Life for Rescued Gaumata',
-    excerpt: 'Read about the incredible recovery of a cow rescued from a highway accident and her new life at GauChara.',
-    image: '/hero-4.jpg',
-    author: 'Amit Sharma',
-    createdAt: '2024-01-10',
-  },
-  {
-    id: '3',
-    slug: 'volunteering-at-gaushala',
-    title: 'My Experience Volunteering at a Gaushala',
-    excerpt: 'One of our volunteers shares the peace and fulfillment found in serving and caring for cows.',
-    image: '/hero-5.png',
-    author: 'Priya Patel',
-    createdAt: '2024-01-05',
-  },
-];
+import { blogApi } from '@/lib/api';
+import { getImageUrl } from '@/lib/utils';
 
 const BlogPreview = () => {
+  const [blogs, setBlogs] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const response = await blogApi.getAll();
+        // Sort by date and take latest 3
+        const latestBlogs = response.data
+          .sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+          .slice(0, 3);
+        setBlogs(latestBlogs);
+      } catch (error) {
+        console.error("Failed to fetch blog previews", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchBlogs();
+  }, []);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -59,7 +52,15 @@ const BlogPreview = () => {
 
         {/* Blog Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {mockBlogs.map((blog) => (
+          {isLoading ? (
+            Array(3).fill(0).map((_, i) => (
+              <div key={i} className="bg-card rounded-2xl overflow-hidden shadow-lg h-[400px] animate-pulse" />
+            ))
+          ) : blogs.length === 0 ? (
+            <div className="col-span-full text-center py-20 text-muted-foreground italic font-medium">
+              No recent updates detected in the archives.
+            </div>
+          ) : blogs.map((blog) => (
             <article
               key={blog.id}
               className="bg-card rounded-2xl overflow-hidden shadow-lg card-hover group"
@@ -67,10 +68,14 @@ const BlogPreview = () => {
               {/* Image */}
               <Link to={`/blog/${blog.slug}`} className="block relative h-52 overflow-hidden">
                 <img
-                  src={blog.image}
+                  src={getImageUrl(blog.image_file || blog.image || blog.image_url)}
                   alt={blog.title}
                   className="w-full h-full object-cover transition-transform duration-500 
                            group-hover:scale-110"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/placeholder.svg';
+                  }}
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
               </Link>
@@ -81,11 +86,11 @@ const BlogPreview = () => {
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
-                    {formatDate(blog.createdAt)}
+                    {formatDate(blog.created_at || blog.createdAt)}
                   </span>
                   <span className="flex items-center gap-1">
                     <User className="w-4 h-4" />
-                    {blog.author}
+                    {typeof blog.author === 'object' ? (blog.author?.username || 'GauChara Admin') : (blog.author || 'GauChara Admin')}
                   </span>
                 </div>
 
@@ -97,7 +102,7 @@ const BlogPreview = () => {
                 </Link>
 
                 <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
-                  {blog.excerpt}
+                  {blog.short_description || blog.excerpt}
                 </p>
 
                 <Link

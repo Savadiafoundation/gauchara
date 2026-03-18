@@ -70,7 +70,9 @@ export const testimonialApi = {
 
 // Donation APIs
 export const donationApi = {
-  create: (data: Record<string, unknown>) => axiosInstance.post('/donations', data),
+  create: (data: Record<string, unknown>) => axiosInstance.post('/donation1/', data),
+  getAll: () => axiosInstance.get('/donation2/'),
+  updateStatus: (id: number | string, data: { payment_status: string }) => axiosInstance.patch(`/donation3/${id}/status/`, data),
   verifyPayPal: (orderId: string) => axiosInstance.post('/donations/verify-paypal', { orderId }),
   uploadProof: async (donationId: string, file: File) => {
     const formData = new FormData();
@@ -199,11 +201,27 @@ export interface Testimonial {
 export interface DonationData {
   amount: number;
   currency: string;
-  causeId?: string;
-  donorName: string;
-  donorEmail: string;
-  paymentMethod: 'paypal' | 'swift';
-  message?: string;
+  cause_id?: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  // For Payment Gateways
+  payment_method?: 'upi' | 'swift' | 'stripe' | 'paypal';
+}
+
+export interface DonationRecord {
+  id: number;
+  final_amount: string;
+  full_name: string;
+  email: string;
+  whatsapp_number: string | null;
+  pan_number: string | null;
+  selected_amount: number | null;
+  custom_amount: number | null;
+  region: string;
+  uploaded_receipt: string | null;
+  payment_status: 'pending' | 'success' | 'failed';
+  created_at: string;
 }
 
 export interface DonationResponse {

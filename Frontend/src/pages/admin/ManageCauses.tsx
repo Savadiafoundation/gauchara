@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { getImageUrl } from '@/lib/utils';
 import { causeApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Plus, Pencil, Trash2, Loader2, ArrowLeft } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Eye, Heart, Target } from 'lucide-react';
 import { toast } from 'sonner';
 import {
     Table,
@@ -32,7 +32,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Check, Eye } from 'lucide-react';
+import AdminLayout from '@/components/layout/AdminLayout';
 
 const ManageCauses = () => {
     const [causes, setCauses] = useState<any[]>([]);
@@ -48,8 +48,8 @@ const ManageCauses = () => {
         try {
             const response = await causeApi.getAll();
             setCauses(response.data);
-        } catch (error) {
-            toast.error('Failed to fetch causes');
+        } catch (error: any) {
+            toast.error(error.backendError || 'Failed to fetch causes');
         } finally {
             setIsLoading(false);
         }
@@ -60,8 +60,8 @@ const ManageCauses = () => {
             await causeApi.delete(String(id));
             setCauses(causes.filter(cause => (cause.id || cause._id) !== id));
             toast.success('Cause deleted successfully');
-        } catch (error) {
-            toast.error('Failed to delete cause');
+        } catch (error: any) {
+            toast.error(error.backendError || 'Failed to delete cause');
         }
     };
 
@@ -71,167 +71,171 @@ const ManageCauses = () => {
     };
 
     return (
-        <div className="min-h-screen bg-muted/30 p-8">
-            <div className="max-w-6xl mx-auto">
-                <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-4">
-                        <Button variant="outline" size="icon" asChild>
-                            <Link to="/admin/dashboard">
-                                <ArrowLeft className="w-4 h-4" />
-                            </Link>
-                        </Button>
-                        <div>
-                            <h1 className="text-3xl font-bold">Manage Causes</h1>
-                            <p className="text-muted-foreground">Create, edit, and remove donation causes</p>
-                        </div>
-                    </div>
-                    <Button asChild>
-                        <Link to="/admin/causes/new">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Create New
-                        </Link>
-                    </Button>
+        <AdminLayout title="Manage Causes">
+            <div className="flex items-center justify-between mb-10">
+                <div>
+                    <h1 className="text-3xl font-black tracking-tight text-foreground">Philanthropic Goals</h1>
+                    <p className="text-muted-foreground text-sm font-medium">Coordinate and track your foundation's impact missions.</p>
                 </div>
-
-                <div className="bg-background rounded-xl border shadow-sm overflow-hidden">
-                    {isLoading ? (
-                        <div className="flex justify-center p-12">
-                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                        </div>
-                    ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Title</TableHead>
-                                    <TableHead>Category</TableHead>
-                                    <TableHead>Goal Amount</TableHead>
-                                    <TableHead>Featured</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {causes.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
-                                            No causes found. Create your first one!
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    causes.map((cause) => (
-                                        <TableRow key={cause.id || cause._id} className="cursor-pointer hover:bg-muted/50" onClick={() => openViewModal(cause)}>
-                                            <TableCell className="font-medium max-w-[200px] truncate">{cause.title}</TableCell>
-                                            <TableCell>
-                                                <Badge variant="secondary">{cause.category}</Badge>
-                                            </TableCell>
-                                            <TableCell>${Number(cause.goal_amount).toLocaleString()}</TableCell>
-                                            <TableCell>
-                                                {cause.featured ? (
-                                                    <Badge className="bg-green-500/15 text-green-700 hover:bg-green-500/25 border-green-500/20">Featured</Badge>
-                                                ) : (
-                                                    <span className="text-muted-foreground text-sm">-</span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                                                    <Button variant="ghost" size="icon" onClick={() => openViewModal(cause)}>
-                                                        <Eye className="w-4 h-4 text-muted-foreground" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="icon" asChild>
-                                                        <Link to={`/admin/causes/edit/${cause.id || cause._id}`}>
-                                                            <Pencil className="w-4 h-4 text-blue-500" />
-                                                        </Link>
-                                                    </Button>
-
-                                                    <AlertDialog>
-                                                        <AlertDialogTrigger asChild>
-                                                            <Button variant="ghost" size="icon">
-                                                                <Trash2 className="w-4 h-4 text-red-500" />
-                                                            </Button>
-                                                        </AlertDialogTrigger>
-                                                        <AlertDialogContent>
-                                                            <AlertDialogHeader>
-                                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                                <AlertDialogDescription>
-                                                                    This action cannot be undone. This will permanently delete the cause.
-                                                                </AlertDialogDescription>
-                                                            </AlertDialogHeader>
-                                                            <AlertDialogFooter>
-                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                <AlertDialogAction onClick={() => handleDelete(cause.id || cause._id)} className="bg-red-500 hover:bg-red-600">
-                                                                    Delete
-                                                                </AlertDialogAction>
-                                                            </AlertDialogFooter>
-                                                        </AlertDialogContent>
-                                                    </AlertDialog>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                    )}
-                </div>
+                <Button asChild className="rounded-2xl h-12 shadow-xl shadow-rose-500/20 hover:shadow-rose-500/30 group bg-rose-500 hover:bg-rose-600 border-none">
+                    <Link to="/admin/causes/new">
+                        <Plus className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                        Create Mission
+                    </Link>
+                </Button>
             </div>
 
-            {/* View Details Modal */}
-            <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle>Cause Details</DialogTitle>
-                        <DialogDescription>
-                            Full details for "{selectedCause?.title}"
-                        </DialogDescription>
-                    </DialogHeader>
+            <div className="bg-background rounded-[40px] border border-border/50 shadow-sm overflow-hidden">
+                {isLoading ? (
+                    <div className="flex justify-center p-24">
+                        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                    </div>
+                ) : (
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="border-b border-border/50 hover:bg-transparent px-6 text-foreground">
+                                <TableHead className="pl-10 font-black uppercase text-[10px] tracking-widest h-16">Cause / Mission</TableHead>
+                                <TableHead className="font-black uppercase text-[10px] tracking-widest h-16">Domain</TableHead>
+                                <TableHead className="font-black uppercase text-[10px] tracking-widest h-16">Financial Goal</TableHead>
+                                <TableHead className="font-black uppercase text-[10px] tracking-widest h-16">Priority</TableHead>
+                                <TableHead className="text-right pr-10 font-black uppercase text-[10px] tracking-widest h-16">Governance</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {causes.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center py-24 text-muted-foreground italic font-medium">
+                                        No active missions at this time.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                causes.map((cause) => (
+                                    <TableRow key={cause.id || cause._id} className="cursor-pointer hover:bg-muted/10 transition-colors group px-6 border-b border-border/30" onClick={() => openViewModal(cause)}>
+                                        <TableCell className="pl-10 py-6">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-16 h-12 rounded-2xl overflow-hidden bg-muted group-hover:scale-105 transition-transform duration-500 shadow-sm border border-border/50 shrink-0">
+                                                    <img
+                                                        src={getImageUrl(cause.image_file || cause.image || cause.image_url)}
+                                                        alt={cause.title}
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            e.currentTarget.onerror = null;
+                                                            e.currentTarget.src = '/placeholder.svg';
+                                                        }}
+                                                    />
+                                                </div>
+                                                <span className="font-black text-sm tracking-tight text-foreground truncate max-w-[200px]">{cause.title}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline" className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest border-border/60">{cause.category}</Badge>
+                                        </TableCell>
+                                        <TableCell className="font-bold text-foreground">
+                                            <div className="flex items-center gap-2">
+                                                <Target className="w-3.5 h-3.5 text-rose-500/40" />
+                                                <span>₹{Number(cause.goal_amount).toLocaleString()}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            {cause.featured ? (
+                                                <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20 rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest">High Priority</Badge>
+                                            ) : (
+                                                <span className="text-muted-foreground text-[10px] font-black uppercase tracking-widest pl-3">Standard</span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell className="text-right pr-10">
+                                            <div className="flex justify-end gap-3" onClick={(e) => e.stopPropagation()}>
+                                                <Button variant="ghost" size="icon" className="rounded-xl hover:bg-rose-50 group/btn" onClick={() => openViewModal(cause)}>
+                                                    <Eye className="w-4 h-4 text-muted-foreground group-hover/btn:text-rose-500 transition-colors" />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="rounded-xl hover:bg-blue-50 group/btn" asChild>
+                                                    <Link to={`/admin/causes/edit/${cause.id || cause._id}`}>
+                                                        <Pencil className="w-4 h-4 text-blue-400 group-hover/btn:text-blue-600 transition-colors" />
+                                                    </Link>
+                                                </Button>
 
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="rounded-xl hover:bg-red-50 group/btn">
+                                                            <Trash2 className="w-4 h-4 text-red-400 group-hover/btn:text-red-600 transition-colors" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent className="rounded-[40px] border-none shadow-2xl p-10">
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle className="text-2xl font-black tracking-tight">Decommission Mission?</AlertDialogTitle>
+                                                            <AlertDialogDescription className="text-muted-foreground font-medium pt-2">
+                                                                This cause will be permanently archived and removed from public accessibility.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter className="pt-6">
+                                                            <AlertDialogCancel className="rounded-2xl h-12 font-bold px-8 border-2">Keep Mission</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={() => handleDelete(cause.id || cause._id)} className="bg-red-500 hover:bg-red-600 rounded-2xl h-12 font-bold px-8 shadow-xl shadow-red-500/20 border-none">
+                                                                Decommission
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                )}
+            </div>
+
+            <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[40px] border-none shadow-2xl p-0">
                     {selectedCause && (
-                        <div className="space-y-6 pt-4">
-                            {/* Header Info */}
-                            <div className="flex flex-col md:flex-row gap-4 justify-between items-start border-b pb-4">
-                                <div>
-                                    <h3 className="text-xl font-bold">{selectedCause.title}</h3>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <Badge variant="outline">{selectedCause.category}</Badge>
-                                        {selectedCause.featured && <Badge className="bg-green-500 text-white border-none">Featured</Badge>}
-                                        <span className="text-xs text-muted-foreground ml-2">ID: {selectedCause.id || selectedCause._id}</span>
+                        <div className="space-y-0">
+                            <div className="relative aspect-video w-full">
+                                <img
+                                    src={getImageUrl(selectedCause.image_file || selectedCause.image || selectedCause.image_url) || '/placeholder.svg'}
+                                    alt={selectedCause.title}
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-12">
+                                    <div className="space-y-4">
+                                        <Badge className="bg-rose-500 hover:bg-rose-500 text-white border-none px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-rose-500/30">Active Mission</Badge>
+                                        <h3 className="text-3xl font-black text-white italic tracking-tight">{selectedCause.title}</h3>
                                     </div>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-sm text-muted-foreground">Goal Amount</p>
-                                    <p className="text-2xl font-bold text-primary">${Number(selectedCause.goal_amount).toLocaleString()}</p>
                                 </div>
                             </div>
 
-                            {/* Image */}
-                            {(selectedCause.image || selectedCause.image_file || selectedCause.image_url) && (
-                                <div className="rounded-xl overflow-hidden border bg-muted w-full aspect-video">
-                                    <img
-                                        src={getImageUrl(selectedCause.image_file || selectedCause.image || selectedCause.image_url)}
-                                        alt={selectedCause.title}
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            e.currentTarget.src = '/placeholder.svg';
-                                        }}
-                                    />
+                            <div className="p-12 space-y-10">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-border/50">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
+                                            <Target className="w-6 h-6 text-rose-500" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-0.5">Financial Goal</p>
+                                            <p className="font-bold text-foreground text-xl">₹{Number(selectedCause.goal_amount).toLocaleString()}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
+                                            <Plus className="w-6 h-6 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-0.5">Domain</p>
+                                            <p className="font-bold text-foreground">{selectedCause.category}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-end">
+                                        <Button variant="outline" className="rounded-2xl h-12 px-8 border-2 font-black text-xs uppercase tracking-widest" asChild>
+                                            <Link to={`/admin/causes/edit/${selectedCause.id || selectedCause._id}`}>Edit Goal</Link>
+                                        </Button>
+                                    </div>
                                 </div>
-                            )}
 
-                            {/* Descriptions */}
-                            <div className="space-y-4">
-                                <div>
-                                    <h4 className="font-semibold mb-1">Short Description</h4>
-                                    <p className="text-muted-foreground bg-muted/30 p-3 rounded-md text-sm">
-                                        {selectedCause.short_description || "No short description provided."}
-                                    </p>
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold mb-1">Full Content</h4>
-                                    <div className="prose prose-sm max-w-none bg-muted/30 p-4 rounded-md">
-                                        {selectedCause.full_content ? (
-                                            <div className="whitespace-pre-wrap">{selectedCause.full_content}</div>
-                                        ) : (
-                                            <p className="text-muted-foreground italic">No content available.</p>
-                                        )}
+                                <div className="space-y-10">
+                                    <div className="p-8 bg-muted/40 rounded-[32px] border border-border/50 italic text-muted-foreground font-medium text-lg leading-relaxed relative quote-mask">
+                                        "{selectedCause.short_description || "No mission brief provided."}"
+                                    </div>
+                                    <div className="prose prose-stone max-w-none text-foreground font-medium leading-relaxed">
+                                        <div className="whitespace-pre-wrap">{selectedCause.full_content || "No detailed implementation plan recorded."}</div>
                                     </div>
                                 </div>
                             </div>
@@ -239,7 +243,7 @@ const ManageCauses = () => {
                     )}
                 </DialogContent>
             </Dialog>
-        </div>
+        </AdminLayout>
     );
 };
 

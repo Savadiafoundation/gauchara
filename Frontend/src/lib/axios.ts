@@ -127,14 +127,43 @@ axiosInstance.interceptors.response.use(
         }
 
         // Handle other errors
+        let errorMessage = 'An unexpected error occurred';
+
+        if (error.response) {
+            const data = error.response.data as any;
+
+            // Extract message from various common backend response formats
+            if (data?.detail) errorMessage = data.detail;
+            else if (data?.error) errorMessage = data.error;
+            else if (data?.message) errorMessage = data.message;
+            else if (data?.non_field_errors) errorMessage = Array.isArray(data.non_field_errors) ? data.non_field_errors[0] : data.non_field_errors;
+            else if (typeof data === 'string') errorMessage = data;
+            else if (typeof data === 'object') {
+                // For validation errors, extract the first field error
+                const firstKey = Object.keys(data)[0];
+                if (firstKey && Array.isArray(data[firstKey])) {
+                    errorMessage = `${firstKey}: ${data[firstKey][0]}`;
+                } else if (firstKey) {
+                    errorMessage = `${firstKey}: ${data[firstKey]}`;
+                }
+            }
+        } else if (error.request) {
+            errorMessage = 'No response received from server. Please check your connection.';
+        } else {
+            errorMessage = error.message;
+        }
+
+        // Attach the extracted message to the error object for components to use
+        (error as any).backendError = errorMessage;
+
         if (error.response?.status === 403) {
-            console.error('Access forbidden:', error.response?.data);
+            console.error('Access forbidden:', errorMessage);
         } else if (error.response?.status === 404) {
             console.error('Resource not found:', error.config?.url);
         } else if (error.response?.status >= 500) {
-            console.error('Server error:', error.response?.data);
+            console.error('Server error:', errorMessage);
         } else {
-            console.error('API Error:', error.response?.data || error.message);
+            console.error('API Error:', errorMessage);
         }
 
         return Promise.reject(error);
