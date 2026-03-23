@@ -407,14 +407,14 @@ const Donate = () => {
                                                     <div className="flex flex-col items-center gap-3">
                                                         <div className="flex items-center gap-2 text-xs font-bold px-5 py-2.5 bg-muted/30 rounded-2xl border border-border/60 font-mono">
                                                             <Smartphone className="w-4 h-4 text-primary" />
-                                                            <span>{paymentRegion === 'indian' ? '9052590515@ybl' : 'GAU-REF-' + Math.random().toString(36).substr(2, 6).toUpperCase()}</span>
+                                                            <span>{paymentRegion === 'indian' ? '9052590515@kotak' : 'GAU-REF-' + Math.random().toString(36).substr(2, 6).toUpperCase()}</span>
                                                         </div>
 
                                                         {paymentRegion === 'indian' && (
                                                             <button
                                                                 type="button"
                                                                 onClick={() => {
-                                                                    navigator.clipboard.writeText('9052590515@ybl');
+                                                                    navigator.clipboard.writeText('9052590515@kotak');
                                                                     toast({ title: "UPI ID Copied!", description: "Paste it directly in your payment app." });
                                                                 }}
                                                                 className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary/70 transition-colors"
