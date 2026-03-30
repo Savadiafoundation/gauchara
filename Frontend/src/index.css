@@ -246,7 +246,7 @@
   .thin-scroll::-webkit-scrollbar-track {
     background: transparent;
   }
-
+                                               
   .thin-scroll::-webkit-scrollbar-thumb {
     background: hsl(var(--primary) / 0.2);
     border-radius: 20px;
