@@ -153,8 +153,10 @@ const ManageBlogs = () => {
                                                 </TableCell>
                                                 <TableCell className="text-right pr-10">
                                                     <div className="flex justify-end gap-3" onClick={(e) => e.stopPropagation()}>
-                                                        <Button variant="ghost" size="icon" className="rounded-xl hover:bg-primary/5 group/btn" onClick={() => openViewModal(blog)}>
-                                                            <Eye className="w-4 h-4 text-muted-foreground group-hover/btn:text-primary transition-colors" />
+                                                        <Button variant="ghost" size="icon" className="rounded-xl hover:bg-primary/5 group/btn" asChild>
+                                                            <Link to={`/blog/${blog.slug || blog.id}`} target="_blank">
+                                                                <Eye className="w-4 h-4 text-muted-foreground group-hover/btn:text-primary transition-colors" />
+                                                            </Link>
                                                         </Button>
                                                         <Button variant="ghost" size="icon" className="rounded-xl hover:bg-blue-50 group/btn" asChild>
                                                             <Link to={`/admin/blogs/edit/${blog.id || blog._id}`}>

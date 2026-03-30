@@ -9,7 +9,7 @@ import { getImageUrl } from "@/lib/utils";
 import { toast } from "sonner";
 
 const BlogPost = () => {
-  const { slug } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,8 +18,9 @@ const BlogPost = () => {
     const fetchPost = async () => {
       try {
         setIsLoading(true);
-        // Using getBySlug first, fallback to getById if needed
-        const response = await blogApi.getBySlug(slug!);
+        // User confirmed individual blog is at /api/blog/<int:pk>/
+        if (!id) return;
+        const response = await blogApi.getById(id);
         setPost(response.data);
       } catch (error: any) {
         console.error("Failed to fetch blog post:", error);
@@ -29,8 +30,8 @@ const BlogPost = () => {
         setIsLoading(false);
       }
     };
-    if (slug) fetchPost();
-  }, [slug]);
+    if (id) fetchPost();
+  }, [id]);
 
   if (isLoading) {
     return (
@@ -131,7 +132,8 @@ const BlogPost = () => {
               className="lg:col-span-3"
             >
               <div className="prose prose-lg max-w-none">
-                {post.content.split('\n\n').map((paragraph, index) => {
+                {post.content && post.content.split('\n\n').map((paragraph: string, index: number) => {
+                  // Handle Headers
                   if (paragraph.startsWith('## ')) {
                     return (
                       <h2 key={index} className="font-display text-2xl font-bold text-foreground mt-8 mb-4">
@@ -139,18 +141,41 @@ const BlogPost = () => {
                       </h2>
                     );
                   }
+                  
+                  // Handle Lists
                   if (paragraph.startsWith('- ')) {
                     const items = paragraph.split('\n').map(item => item.replace('- ', ''));
                     return (
-                      <ul key={index} className="list-disc pl-6 space-y-2 text-muted-foreground">
+                      <ul key={index} className="list-disc pl-6 space-y-2 text-muted-foreground my-6">
                         {items.map((item, i) => (
                           <li key={i}>{item.replace(/\*\*/g, '')}</li>
                         ))}
                       </ul>
                     );
                   }
+
+                  // Handle Images: ![alt](url)
+                  const imgMatch = paragraph.match(/!\[(.*?)\]\((.*?)\)/);
+                  if (imgMatch) {
+                    return (
+                      <div key={index} className="my-8 rounded-2xl overflow-hidden shadow-lg border border-border/50 bg-muted/30">
+                        <img 
+                          src={getImageUrl(imgMatch[2])} 
+                          alt={imgMatch[1] || 'Blog image'} 
+                          className="w-full h-auto object-cover max-h-[600px] hover:scale-[1.01] transition-transform duration-500"
+                        />
+                        {imgMatch[1] && (
+                          <p className="text-center text-sm text-muted-foreground py-3 border-t border-border/30 italic">
+                            {imgMatch[1]}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  // Default Paragraph
                   return (
-                    <p key={index} className="text-muted-foreground leading-relaxed mb-4">
+                    <p key={index} className="text-muted-foreground leading-relaxed mb-6 whitespace-pre-line">
                       {paragraph}
                     </p>
                   );

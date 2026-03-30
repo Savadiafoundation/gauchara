@@ -12,16 +12,28 @@ import { getImageUrl } from "@/lib/utils";
 const Blog = () => {
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(7); // Show 1 featured + 6 more initially
 
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         setIsLoading(true);
+        console.log("Fetching blogs from API...");
         const response = await blogApi.getAll();
-        console.log("Blog API Response:", response.data);
+        console.log("Blog API Response received:", response.status, response.data);
+
+        // Ensure data is an array
+        const data = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+        
+        if (!Array.isArray(data)) {
+          console.error("API did not return an array:", response.data);
+          setBlogPosts([]);
+          setIsLoading(false);
+          return;
+        }
 
         // Map backend data to frontend structure if needed
-        const formattedPosts = response.data.map((post: any) => {
+        const formattedPosts = data.map((post: any) => {
           // Robust date parsing
           let displayDate = "Pending";
           const rawDate = post.created_at || post.createdAt || post.date;
@@ -124,9 +136,9 @@ const Blog = () => {
                           </div>
                           <span className="font-medium text-foreground">{blogPosts[0].author}</span>
                         </div>
-                        <Link to={`/blog/${blogPosts[0].slug || blogPosts[0].id}`}>
+                        <Link to={`/blog/${blogPosts[0].id}`}>
                           <Button variant="sacred">
-                            Read More
+                            Know More
                             <ArrowRight className="w-4 h-4 ml-2" />
                           </Button>
                         </Link>
@@ -138,7 +150,7 @@ const Blog = () => {
 
               {/* Post Grid */}
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {blogPosts.slice(1).map((post, index) => (
+                {blogPosts.slice(1, visibleCount).map((post, index) => (
                   <motion.article
                     key={post.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -175,11 +187,11 @@ const Blog = () => {
                           <span className="text-sm text-muted-foreground">{post.author}</span>
                         </div>
                         <Link
-                          to={`/blog/${post.slug || post.id}`}
+                          to={`/blog/${post.id}`}
                           className="text-primary font-medium text-sm hover:text-primary/80 flex items-center gap-1"
                         >
-                          Read
-                          <ArrowRight className="w-4 h-4" />
+                          View
+                          <ArrowRight className="w-4 h-4 ml-1" />
                         </Link>
                       </div>
                     </div>
@@ -188,11 +200,17 @@ const Blog = () => {
               </div>
 
               {/* Load More */}
-              <div className="text-center mt-12">
-                <Button variant="outline-sacred" size="lg">
-                  Load More Articles
-                </Button>
-              </div>
+              {visibleCount < blogPosts.length && (
+                <div className="text-center mt-12">
+                  <Button 
+                    variant="outline-sacred" 
+                    size="lg" 
+                    onClick={() => setVisibleCount(prev => prev + 6)}
+                  >
+                    Load More Articles
+                  </Button>
+                </div>
+              )}
             </>
           )}
         </div>

@@ -66,7 +66,7 @@ const BlogPreview = () => {
               className="bg-card rounded-2xl overflow-hidden shadow-lg card-hover group"
             >
               {/* Image */}
-              <Link to={`/blog/${blog.slug}`} className="block relative h-52 overflow-hidden">
+              <Link to={`/blog/${blog.id || blog._id}`} className="block relative h-52 overflow-hidden">
                 <img
                   src={getImageUrl(blog.image_file || blog.image || blog.image_url)}
                   alt={blog.title}
@@ -94,7 +94,7 @@ const BlogPreview = () => {
                   </span>
                 </div>
 
-                <Link to={`/blog/${blog.slug}`}>
+                <Link to={`/blog/${blog.id || blog._id}`}>
                   <h3 className="text-xl font-bold text-card-foreground mb-2 
                                group-hover:text-primary transition-colors line-clamp-2">
                     {blog.title}
@@ -106,12 +106,12 @@ const BlogPreview = () => {
                 </p>
 
                 <Link
-                  to={`/blog/${blog.slug}`}
+                  to={`/blog/${blog.id || blog._id}`}
                   className="inline-flex items-center gap-2 text-primary font-semibold 
                            text-sm hover:gap-3 transition-all"
                 >
-                  Read More
-                  <ArrowRight className="w-4 h-4" />
+                  Know More
+                  <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </div>
             </article>
