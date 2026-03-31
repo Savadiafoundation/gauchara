@@ -96,11 +96,11 @@ const ManageVolunteers = () => {
     };
 
     return (
-        <AdminLayout title="Talent Acquisition">
+        <AdminLayout title="Volunteer Management">
             <div className="flex items-center justify-between mb-10">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tight text-foreground">Volunteer Registry</h1>
-                    <p className="text-muted-foreground text-sm font-medium">Curate and deploy GauChara's human capital for cows.</p>
+                    <h1 className="text-3xl font-black tracking-tight text-foreground">Volunteer Applications</h1>
+                    <p className="text-muted-foreground text-sm font-medium">Review and manage volunteer applications for GauChara.</p>
                 </div>
                 <Button 
                     variant="outline" 
@@ -122,17 +122,17 @@ const ManageVolunteers = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow className="border-b border-border/50 hover:bg-transparent px-6 text-foreground">
-                                    <TableHead className="pl-10 font-black uppercase text-[10px] tracking-widest h-16 text-foreground">Ambassador</TableHead>
-                                    <TableHead className="font-black uppercase text-[10px] tracking-widest h-16 text-foreground">Contact Mesh</TableHead>
-                                    <TableHead className="font-black uppercase text-[10px] tracking-widest h-16 text-foreground">Lifecycle Stage</TableHead>
-                                    <TableHead className="text-right pr-10 font-black uppercase text-[10px] tracking-widest h-16 text-foreground">Operations</TableHead>
+                                    <TableHead className="pl-10 font-black uppercase text-[10px] tracking-widest h-16 text-foreground">Volunteer Name</TableHead>
+                                    <TableHead className="font-black uppercase text-[10px] tracking-widest h-16 text-foreground">Contact Info</TableHead>
+                                    <TableHead className="font-black uppercase text-[10px] tracking-widest h-16 text-foreground">Application Status</TableHead>
+                                    <TableHead className="text-right pr-10 font-black uppercase text-[10px] tracking-widest h-16 text-foreground">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                         <TableBody>
                             {volunteers.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={4} className="text-center py-24 text-muted-foreground italic font-medium">
-                                        No recruitment applications detected.
+                                        No volunteer applications found.
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -171,16 +171,21 @@ const ManageVolunteers = () => {
                                                     </AlertDialogTrigger>
                                                     <AlertDialogContent className="rounded-[40px] border-none shadow-2xl p-10">
                                                         <AlertDialogHeader>
-                                                            <AlertDialogTitle className="text-2xl font-black tracking-tight">Revoke Partnership?</AlertDialogTitle>
+                                                            <AlertDialogTitle className="text-2xl font-black tracking-tight">Delete Application?</AlertDialogTitle>
                                                             <AlertDialogDescription className="text-muted-foreground font-medium pt-2">
-                                                                This talent record will be permanently purged from the GauChara recruitment funnel.
-                                                                This action is irreversible.
+                                                                Are you sure you want to delete this volunteer application? This action cannot be undone.
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter className="pt-6">
-                                                            <AlertDialogCancel className="rounded-2xl h-12 font-bold px-8 border-2">Retain Talent</AlertDialogCancel>
-                                                            <AlertDialogAction onClick={() => handleDelete(volunteer.id)} className="bg-red-500 hover:bg-red-600 rounded-2xl h-12 font-bold px-8 shadow-xl shadow-red-500/20 border-none">
-                                                                Purge Record
+                                                            <AlertDialogCancel className="rounded-2xl h-12 font-bold px-8 border-2">Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction 
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleDelete(volunteer.id);
+                                                                }} 
+                                                                className="bg-red-500 hover:bg-red-600 rounded-2xl h-12 font-bold px-8 shadow-xl shadow-red-500/20 border-none"
+                                                            >
+                                                                Delete
                                                             </AlertDialogAction>
                                                         </AlertDialogFooter>
                                                     </AlertDialogContent>
@@ -204,9 +209,9 @@ const ManageVolunteers = () => {
                                 <UserCheck className="w-8 h-8 text-primary" />
                             </div>
                             <div>
-                                <DialogTitle className="text-3xl font-black italic tracking-tighter text-primary">Candidate Profile</DialogTitle>
+                                <DialogTitle className="text-3xl font-black italic tracking-tighter text-primary">Volunteer Profile</DialogTitle>
                                 <DialogDescription className="text-muted-foreground font-medium italic mt-1 pb-4">
-                                    Deep-dive analysis of volunteer credentials.
+                                    Details of the volunteer application.
                                 </DialogDescription>
                             </div>
                         </div>
@@ -216,17 +221,17 @@ const ManageVolunteers = () => {
                         <div className="p-6 space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div className="space-y-1">
-                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Candidate Name</h4>
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Full Name</h4>
                                     <p className="font-black text-foreground tracking-tight text-xl truncate max-w-full">{selectedVolunteer.full_name}</p>
                                 </div>
                                 <div className="space-y-1 md:text-right lg:text-left">
-                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Stage</h4>
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Status</h4>
                                     <Badge className={`rounded-xl px-3 py-1 font-black text-[10px] uppercase tracking-widest border-none shadow-sm ${getStatusStyles(selectedVolunteer.status)}`}>
                                         {selectedVolunteer.status || 'Pending'}
                                     </Badge>
                                 </div>
                                 <div className="space-y-1 text-right">
-                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Age Matrix</h4>
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Age</h4>
                                     <p className="font-black text-foreground tracking-tight">{selectedVolunteer.age || "N/A"}</p>
                                 </div>
                                 <div className="space-y-4 col-span-1 md:col-span-2 bg-muted/30 p-6 rounded-3xl border border-border/50">
@@ -259,16 +264,16 @@ const ManageVolunteers = () => {
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3 pl-2">
                                         <Sparkles className="w-4 h-4 text-primary" />
-                                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Competency & Assets</h4>
+                                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Skills & Experience</h4>
                                     </div>
                                     <div className="p-6 bg-muted/40 rounded-[32px] border border-border/50 italic text-muted-foreground font-medium text-sm leading-relaxed">
-                                        {selectedVolunteer.skills || "Candidate has not listed specific skill-sets."}
+                                        {selectedVolunteer.skills || "No skills listed."}
                                     </div>
                                 </div>
                                 <div className="space-y-4">
-                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 pl-2">Mission Rationale</h4>
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 pl-2">Reason for Volunteering</h4>
                                     <div className="p-6 bg-muted/40 rounded-[32px] border border-border/50 italic text-muted-foreground font-medium text-sm leading-relaxed relative quote-mask">
-                                        "{selectedVolunteer.reason || "Manifesto pending."}"
+                                        "{selectedVolunteer.reason || "Not specified."}"
                                     </div>
                                 </div>
                             </div>
