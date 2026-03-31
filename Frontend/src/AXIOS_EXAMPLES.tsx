@@ -1,7 +1,7 @@
 // Example: Using Axios Interceptors with Token Refresh
 
 import axiosInstance, { refreshAccessToken, clearAuthTokens } from '@/lib/axios';
-import { blogApi } from '@/lib/api';
+import { blogApi, authApi, causeApi, testimonialApi } from '@/lib/api';
 
 // ============================================
 // Example 1: Basic API Call (Automatic Token Handling)
@@ -21,6 +21,7 @@ export const fetchBlogs = async () => {
 // Example 2: Protected Route with Token Check
 // ============================================
 export const ProtectedComponent = () => {
+    const navigate = (path: string) => window.location.href = path; // Mock navigate
     useEffect(() => {
         const token = localStorage.getItem('admin_token');
         if (!token) {

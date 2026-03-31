@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { donationApi, DonationRecord } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Loader2, Eye, ExternalLink, HeartHandshake, Calendar, CreditCard, MapPin, Download } from 'lucide-react';
+import { Loader2, Eye, ExternalLink, HeartHandshake, Calendar, CreditCard, MapPin, Download, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import {
     Table,
@@ -156,7 +156,7 @@ const ManageDonations = () => {
                                                 >
                                                     Visual Proof <ExternalLink className="w-3 h-3 group-hover/link:translate-x-0.5 transition-transform" />
                                                 </button>
-                                            ) : <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 italic">Not Uploaded</span>}
+                                            ) : <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 italic">Check WhatsApp</span>}
                                         </TableCell>
                                         <TableCell>
                                             <div onClick={(e) => e.stopPropagation()}>
@@ -220,7 +220,11 @@ const ManageDonations = () => {
                                     <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Telecom</h4>
                                     <p className="font-black text-foreground tracking-tight">{selectedDonation.whatsapp_number || "Unregistered"}</p>
                                 </div>
-                                <div className="space-y-1 text-right">
+                                <div className="space-y-1">
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">PAN Number</h4>
+                                    <p className="font-black text-foreground tracking-tight uppercase">{selectedDonation.pan_number || "Not Provided"}</p>
+                                </div>
+                                <div className="space-y-1">
                                     <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Region</h4>
                                     <p className="font-bold text-foreground tracking-widest">{selectedDonation.region}</p>
                                 </div>
@@ -269,6 +273,15 @@ const ManageDonations = () => {
                                             className="w-full h-auto object-contain max-h-[350px] transition-transform duration-700 group-hover/img:scale-105"
                                         />
                                     </div>
+                                </div>
+                            )}
+                            {!selectedDonation.uploaded_receipt && (
+                                <div className="p-6 bg-amber-500/5 border border-dashed border-amber-500/20 rounded-[32px] text-center">
+                                    <Phone className="w-8 h-8 text-amber-500/40 mx-auto mb-3" />
+                                    <p className="text-xs font-bold text-amber-600/80 italic leading-relaxed">
+                                        No screenshot uploaded in-app. <br/>
+                                        Verification may have been sent directly to the official WhatsApp (+91 9052590515).
+                                    </p>
                                 </div>
                             )}
                         </div>

@@ -9,12 +9,14 @@ import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
 import PageHero from "@/components/layout/PageHero";
 import { donationApi } from "@/lib/api";
+import { useRef } from "react";
 
 const donationAmounts = [500, 1000, 2500, 5000, 10000, 25000];
 
 const Donate = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [step, setStep] = useState(1);
     const [isProcessing, setIsProcessing] = useState(false);
     const [selectedAmount, setSelectedAmount] = useState<number | null>(1000);
@@ -77,12 +79,60 @@ const Donate = () => {
         }, 800);
     };
 
-    const handlePaymentDone = () => {
+    const handleWhatsAppClick = () => {
+        const amount = customAmount ? parseInt(customAmount) : selectedAmount;
+        const message = `Hello Savadia Foundation, I've just donated ₹${amount?.toLocaleString()} for Gau Seva. My name is ${formData.full_name}. I'm attaching the screenshot below.`;
+        const encodedMessage = encodeURIComponent(message);
+        window.open(`https://wa.me/919052590515?text=${encodedMessage}`, '_blank');
+        
+        // Also log the intent
+        handlePaymentDone(false);
+    };
+
+    const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsProcessing(true);
+        const amount = customAmount ? parseInt(customAmount) : selectedAmount;
+
+        const uploadData = new FormData();
+        uploadData.append('full_name', formData.full_name);
+        uploadData.append('email', formData.email);
+        uploadData.append('whatsapp_number', formData.phone);
+        uploadData.append('pan_number', formData.pan);
+        uploadData.append('final_amount', (amount || 0).toString());
+        uploadData.append('selected_amount', (customAmount ? null : selectedAmount)?.toString() || '');
+        uploadData.append('custom_amount', (customAmount ? parseInt(customAmount) : null)?.toString() || '');
+        uploadData.append('region', paymentRegion === 'indian' ? 'India' : 'International');
+        uploadData.append('payment_status', 'pending');
+        uploadData.append('uploaded_receipt', file);
+
+        try {
+            await donationApi.create(uploadData);
+            toast({
+                title: "Screenshot Uploaded",
+                description: "Thank you! Our team will verify the payment and send your receipt within 24 hours.",
+            });
+            navigate('/');
+        } catch (err: any) {
+            console.error("Upload failed:", err);
+            toast({
+                title: "Upload Failed",
+                description: "We couldn't upload the screenshot. Please try again or send it via WhatsApp.",
+                variant: 'destructive',
+            });
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handlePaymentDone = (redirect = true) => {
         setIsProcessing(true);
         const amount = customAmount ? parseInt(customAmount) : selectedAmount;
 
         donationApi.create({
-            final_amount: amount.toString(), // Django decimal often expects string
+            final_amount: (amount || 0).toString(),
             selected_amount: customAmount ? null : selectedAmount,
             custom_amount: customAmount ? parseInt(customAmount) : null,
             currency: "INR",
@@ -92,21 +142,19 @@ const Donate = () => {
             pan_number: formData.pan,
             payment_method: paymentRegion === 'indian' ? 'upi' : 'swift',
             region: paymentRegion === 'indian' ? 'India' : 'International',
+            payment_status: 'pending',
         })
             .then(() => {
-                toast({
-                    title: "Donation Recorded",
-                    description: "Thank you for your support! Our team will verify the payment.",
-                });
-                navigate('/');
+                if (redirect) {
+                    toast({
+                        title: "Donation Recorded",
+                        description: "Thank you for your support! Our team will verify the payment.",
+                    });
+                    navigate('/');
+                }
             })
             .catch(err => {
                 console.error("Donation record failed:", err);
-                toast({
-                    title: "Action Recorded",
-                    description: "Thank you! We have logged your donation intent.",
-                });
-                navigate('/');
             })
             .finally(() => {
                 setIsProcessing(false);
@@ -430,16 +478,33 @@ const Donate = () => {
 
                                         {/* Verification Cards */}
                                         <div className="grid sm:grid-cols-2 gap-6 mb-12 text-left">
-                                            <div className="p-8 rounded-[32px] bg-primary/5 border border-primary/10 hover:shadow-xl hover:shadow-primary/5 transition-all">
-                                                <Phone className="w-8 h-8 mb-6 text-primary" />
+                                            <button 
+                                                type="button"
+                                                onClick={handleWhatsAppClick}
+                                                className="p-8 rounded-[32px] bg-primary/5 border border-primary/10 hover:shadow-xl hover:shadow-primary/5 transition-all text-left group/wa"
+                                            >
+                                                <Phone className="w-8 h-8 mb-6 text-primary group-hover/wa:scale-110 transition-transform" />
                                                 <h4 className="font-black text-lg mb-3">WhatsApp Receipt</h4>
                                                 <p className="text-xs font-medium text-muted-foreground leading-relaxed">Send a screenshot of payment to <span className="font-black text-foreground">+91 9052590515</span>. We will verify and send your receipt.</p>
-                                            </div>
+                                            </button>
 
-                                            <div className="p-8 rounded-[32px] bg-accent/5 border border-accent/10 hover:shadow-xl hover:shadow-accent/5 transition-all">
-                                                <Upload className="w-8 h-8 mb-6 text-primary" />
-                                                <h4 className="font-black text-lg mb-3">Instant Upload</h4>
-                                                <p className="text-xs font-medium text-muted-foreground leading-relaxed">Prefer email? Upload your proof here. Our team will process your 80G certificate within 24 hours.</p>
+                                            <div className="relative">
+                                                <input 
+                                                    type="file" 
+                                                    ref={fileInputRef}
+                                                    onChange={handleScreenshotUpload}
+                                                    accept="image/*"
+                                                    className="hidden" 
+                                                />
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => fileInputRef.current?.click()}
+                                                    className="w-full h-full p-8 rounded-[32px] bg-accent/5 border border-accent/10 hover:shadow-xl hover:shadow-accent/5 transition-all text-left group/up"
+                                                >
+                                                    <Upload className="w-8 h-8 mb-6 text-primary group-hover/up:scale-110 transition-transform" />
+                                                    <h4 className="font-black text-lg mb-3">Instant Upload</h4>
+                                                    <p className="text-xs font-medium text-muted-foreground leading-relaxed">Prefer automated verification? Upload your screenshot here. Our team will process your 80G certificate within 24 hours.</p>
+                                                </button>
                                             </div>
                                         </div>
 

@@ -70,7 +70,12 @@ export const testimonialApi = {
 
 // Donation APIs
 export const donationApi = {
-  create: (data: Record<string, unknown>) => axiosInstance.post('/donation1/', data),
+  create: (data: FormData | Record<string, unknown>) => {
+    const isFormData = data instanceof FormData;
+    return axiosInstance.post('/donation1/', data, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+    });
+  },
   getAll: () => axiosInstance.get('/donation2/'),
   updateStatus: (id: number | string, data: { payment_status: string }) => axiosInstance.patch(`/donation3/${id}/status/`, data),
   verifyPayPal: (orderId: string) => axiosInstance.post('/donations/verify-paypal', { orderId }),
