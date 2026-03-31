@@ -13,6 +13,7 @@ import Gallery from "./pages/Gallery";
 import Services from "./pages/Services";
 import Programs from "./pages/Programs";
 import Volunteer from "./pages/Volunteer";
+import Causes from "./pages/Causes";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import ManageBlogs from "./pages/admin/ManageBlogs";
@@ -53,7 +54,7 @@ const App = () => {
             <Route path="/services" element={<Services />} />
             <Route path="/programs" element={<Programs />} />
             <Route path="/volunteer" element={<Volunteer />} />
-            <Route path="/causes" element={<Index />} /> {/* Temporary redirect to home section */}
+            <Route path="/causes" element={<Causes />} />
 
             {/* Admin Routes */}
             <Route path="/admin-login" element={<AdminLogin />} />

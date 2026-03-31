@@ -68,7 +68,7 @@ const BlogPreview = () => {
               {/* Image */}
               <Link to={`/blog/${blog.id || blog._id}`} className="block relative h-52 overflow-hidden">
                 <img
-                  src={getImageUrl(blog.image_file || blog.image || blog.image_url)}
+                  src={getImageUrl(blog.featured_image || blog.featured_image_url || blog.image_file || blog.image)}
                   alt={blog.title}
                   className="w-full h-full object-cover transition-transform duration-500 
                            group-hover:scale-110"
@@ -86,7 +86,7 @@ const BlogPreview = () => {
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
-                    {formatDate(blog.created_at || blog.createdAt)}
+                    {formatDate(blog.created_at || blog.createdAt || blog.date)}
                   </span>
                   <span className="flex items-center gap-1">
                     <User className="w-4 h-4" />

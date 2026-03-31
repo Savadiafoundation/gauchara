@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Quote, Loader2 } from 'lucide-react';
 import { testimonialApi } from '@/lib/api';
+import { getImageUrl } from '@/lib/utils';
 import { toast } from 'sonner';
 
 const Testimonials = () => {
@@ -99,10 +100,14 @@ const Testimonials = () => {
                 {/* Avatar */}
                 <div className="flex-shrink-0">
                   <img
-                    src={testimonials[currentIndex].image}
+                    src={getImageUrl(testimonials[currentIndex].image || testimonials[currentIndex].image_file || testimonials[currentIndex].image_url)}
                     alt={testimonials[currentIndex].name}
                     className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover 
                              border-4 border-primary shadow-lg"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + testimonials[currentIndex].name;
+                    }}
                   />
                 </div>
 

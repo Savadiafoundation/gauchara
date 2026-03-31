@@ -4,6 +4,7 @@ import { ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { causeApi } from '@/lib/api';
+import { getImageUrl } from '@/lib/utils';
 import { toast } from 'sonner';
 
 const Causes = () => {
@@ -59,7 +60,9 @@ const Causes = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {causes.map((cause) => {
-              const percentage = Math.round((cause.raisedAmount / cause.goalAmount) * 100);
+              const raised = Number(cause.raised_amount) || 0;
+              const goal = Number(cause.goal_amount) || 1;
+              const percentage = Math.round((raised / goal) * 100);
 
               return (
                 <div
@@ -67,12 +70,16 @@ const Causes = () => {
                   className="bg-card rounded-2xl overflow-hidden shadow-lg card-hover group"
                 >
                   {/* Image */}
-                  <div className="relative h-56 overflow-hidden">
+                  <Link to="/donate" className="relative h-56 overflow-hidden block">
                     <img
-                      src={cause.image}
+                      src={getImageUrl(cause.image_file || cause.image_url || cause.image)}
                       alt={cause.title}
                       className="w-full h-full object-cover transition-transform duration-500 
                                group-hover:scale-110"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = '/placeholder.svg';
+                      }}
                     />
                     <div className="absolute top-4 left-4">
                       <span className="px-3 py-1 bg-primary text-primary-foreground text-xs 
@@ -80,26 +87,28 @@ const Causes = () => {
                         {cause.category}
                       </span>
                     </div>
-                  </div>
+                  </Link>
 
                   {/* Content */}
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-card-foreground mb-2 
-                                 group-hover:text-primary transition-colors">
-                      {cause.title}
-                    </h3>
+                    <Link to="/donate">
+                      <h3 className="text-xl font-bold text-card-foreground mb-2 
+                                   group-hover:text-primary transition-colors line-clamp-1">
+                        {cause.title}
+                      </h3>
+                    </Link>
                     <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                      {cause.description}
+                      {cause.short_description || cause.description}
                     </p>
 
                     {/* Progress */}
                     <div className="mb-4">
                       <div className="flex justify-between text-sm mb-2">
                         <span className="font-semibold text-primary">
-                          ${cause.raisedAmount.toLocaleString()}
+                          ₹{raised.toLocaleString()}
                         </span>
                         <span className="text-muted-foreground">
-                          Goal: ${cause.goalAmount.toLocaleString()}
+                          Goal: ₹{goal.toLocaleString()}
                         </span>
                       </div>
                       <Progress value={percentage} className="h-2" />
