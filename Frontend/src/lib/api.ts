@@ -19,7 +19,7 @@ export const blogApi = {
     return axiosInstance.post('/blog/', data);
   },
   update: (id: number | string, data: FormData | any) => {
-    return axiosInstance.patch(`/blog/${id}/`, data);
+    return axiosInstance.put(`/blog/${id}/`, data);
   },
   delete: (id: number | string) => axiosInstance.delete(`/blog/${id}/`),
 };
