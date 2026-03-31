@@ -147,13 +147,11 @@ const CauseEditor = () => {
                 data.append('image', formData.image);
             }
             
-            payload = data;
-
             if (isEditing) {
-                await causeApi.update(id!, payload);
+                await causeApi.update(id!, data);
                 toast.success('Cause updated successfully');
             } else {
-                await causeApi.create(payload);
+                await causeApi.create(data);
                 toast.success('Cause created successfully');
             }
             navigate('/admin/causes');

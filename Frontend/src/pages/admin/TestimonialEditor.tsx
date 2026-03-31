@@ -134,13 +134,11 @@ const TestimonialEditor = () => {
                 data.append('image', formData.image);
             }
             
-            payload = data;
-
             if (isEditing) {
-                await testimonialApi.update(id!, payload);
+                await testimonialApi.update(id!, data);
                 toast.success('Testimonial updated successfully');
             } else {
-                await testimonialApi.create(payload);
+                await testimonialApi.create(data);
                 toast.success('Testimonial created successfully');
             }
             navigate('/admin/testimonials');

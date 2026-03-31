@@ -99,8 +99,6 @@ const BlogEditor = () => {
         e.preventDefault();
         setIsLoading(true);
 
-        let payload: any;
-
         const data = new FormData();
         data.append('title', formData.title);
         data.append('slug', formData.slug);
@@ -115,14 +113,12 @@ const BlogEditor = () => {
             data.append('featured_image_url', formData.featured_image);
         }
         
-        payload = data;
-
         try {
             if (isEditing) {
-                await blogApi.update(id!, payload);
+                await blogApi.update(id!, data);
                 toast.success('Blog updated successfully');
             } else {
-                await blogApi.create(payload);
+                await blogApi.create(data);
                 toast.success('Blog created successfully');
             }
             navigate('/admin/blogs');
