@@ -122,24 +122,19 @@ const TestimonialEditor = () => {
         setIsLoading(true);
 
         try {
-            let payload: any;
+            const data = new FormData();
+            data.append('name', formData.name);
+            data.append('role', formData.role);
+            data.append('content', formData.content);
+            data.append('rating', formData.rating);
 
             if (imageFile) {
-                const data = new FormData();
-                data.append('name', formData.name);
-                data.append('role', formData.role);
-                data.append('content', formData.content);
-                data.append('rating', formData.rating);
                 data.append('image', imageFile);
-                payload = data;
-            } else {
-                const { image, ...rest } = formData;
-                payload = {
-                    ...rest,
-                    image_url: image || '',
-                    rating: Number(formData.rating),
-                };
+            } else if (formData.image) {
+                data.append('image', formData.image);
             }
+            
+            payload = data;
 
             if (isEditing) {
                 await testimonialApi.update(id!, payload);

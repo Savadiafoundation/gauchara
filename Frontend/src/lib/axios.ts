@@ -6,9 +6,6 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://gauchara-8368.onre
 // Create axios instance
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
     withCredentials: false,
 });
 

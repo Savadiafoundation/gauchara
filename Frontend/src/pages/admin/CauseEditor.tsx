@@ -133,24 +133,21 @@ const CauseEditor = () => {
         setIsLoading(true);
 
         try {
-            let payload: any;
+            const data = new FormData();
+            data.append('title', formData.title);
+            data.append('short_description', formData.short_description);
+            data.append('full_content', formData.full_content);
+            data.append('goal_amount', formData.goal_amount); 
+            data.append('category', formData.category);
+            data.append('featured', String(formData.featured));
 
             if (imageFile) {
-                const data = new FormData();
-                data.append('title', formData.title);
-                data.append('short_description', formData.short_description);
-                data.append('full_content', formData.full_content);
-                data.append('goal_amount', formData.goal_amount); // Backend should parse this
-                data.append('category', formData.category);
-                data.append('featured', String(formData.featured));
                 data.append('image', imageFile);
-                payload = data;
-            } else {
-                payload = {
-                    ...formData,
-                    goal_amount: Number(formData.goal_amount),
-                };
+            } else if (formData.image) {
+                data.append('image', formData.image);
             }
+            
+            payload = data;
 
             if (isEditing) {
                 await causeApi.update(id!, payload);

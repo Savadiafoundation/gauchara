@@ -101,21 +101,21 @@ const BlogEditor = () => {
 
         let payload: any;
 
+        const data = new FormData();
+        data.append('title', formData.title);
+        data.append('slug', formData.slug);
+        data.append('content', formData.content);
+        data.append('excerpt', formData.excerpt);
+        data.append('author', formData.author);
+
         if (uploadType === 'file' && imageFile) {
-            const data = new FormData();
-            data.append('title', formData.title);
-            data.append('slug', formData.slug);
-            data.append('content', formData.content);
-            data.append('excerpt', formData.excerpt);
-            data.append('author', formData.author);
-            data.append('image', imageFile);
-            payload = data;
-        } else {
-            payload = {
-                ...formData,
-                featured_image_url: formData.featured_image,
-            };
+            console.log("Selected Image File:", imageFile); // User Debug Checklist
+            data.append('featured_image', imageFile);
+        } else if (formData.featured_image) {
+            data.append('featured_image_url', formData.featured_image);
         }
+        
+        payload = data;
 
         try {
             if (isEditing) {

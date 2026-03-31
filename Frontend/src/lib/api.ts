@@ -16,16 +16,10 @@ export const blogApi = {
   getById: (id: number | string) => axiosInstance.get(`/blog/${id}/`),
   getBySlug: (slug: string) => axiosInstance.get(`/blog/${slug}/`), // Keeping for compatibility, check if backend supports
   create: (data: FormData | any) => {
-    const isFormData = data instanceof FormData;
-    return axiosInstance.post('/blog/', data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
-    });
+    return axiosInstance.post('/blog/', data);
   },
   update: (id: number | string, data: FormData | any) => {
-    const isFormData = data instanceof FormData;
-    return axiosInstance.put(`/blog/${id}/`, data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
-    });
+    return axiosInstance.patch(`/blog/${id}/`, data);
   },
   delete: (id: number | string) => axiosInstance.delete(`/blog/${id}/`),
 };
@@ -35,16 +29,10 @@ export const causeApi = {
   getAll: () => axiosInstance.get('/cause/'),
   getById: (id: string) => axiosInstance.get(`/cause/${id}/`),
   create: (data: FormData | Record<string, unknown>) => {
-    const isFormData = data instanceof FormData;
-    return axiosInstance.post('/cause/', data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
-    });
+    return axiosInstance.post('/cause/', data);
   },
   update: (id: string, data: FormData | Record<string, unknown>) => {
-    const isFormData = data instanceof FormData;
-    return axiosInstance.put(`/cause/${id}/`, data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
-    });
+    return axiosInstance.put(`/cause/${id}/`, data);
   },
   delete: (id: string) => axiosInstance.delete(`/cause/${id}/`),
 };
@@ -54,16 +42,10 @@ export const testimonialApi = {
   getAll: () => axiosInstance.get('/testimonial/'),
   getById: (id: string | number) => axiosInstance.get(`/testimonial/${id}/`),
   create: (data: FormData | Record<string, unknown>) => {
-    const isFormData = data instanceof FormData;
-    return axiosInstance.post('/testimonial/', data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
-    });
+    return axiosInstance.post('/testimonial/', data);
   },
-  update: (id: string, data: FormData | Record<string, unknown>) => {
-    const isFormData = data instanceof FormData;
-    return axiosInstance.put(`/testimonial/${id}/`, data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
-    });
+  update: (id: string | number, data: FormData | Record<string, unknown>) => {
+    return axiosInstance.put(`/testimonial/${id}/`, data);
   },
   delete: (id: string) => axiosInstance.delete(`/testimonial/${id}/`),
 };
@@ -71,10 +53,7 @@ export const testimonialApi = {
 // Donation APIs
 export const donationApi = {
   create: (data: FormData | Record<string, unknown>) => {
-    const isFormData = data instanceof FormData;
-    return axiosInstance.post('/donation1/', data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
-    });
+    return axiosInstance.post('/donation1/', data);
   },
   getAll: () => axiosInstance.get('/donation2/'),
   updateStatus: (id: number | string, data: { payment_status: string }) => axiosInstance.patch(`/donation3/${id}/status/`, data),
@@ -119,14 +98,10 @@ export const volunteerApi = {
 
 // Gallery API
 export const galleryApi = {
-  create: (data: FormData) => axiosInstance.post('/gallery/', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
+  create: (data: FormData) => axiosInstance.post('/gallery/', data),
   getAll: () => axiosInstance.get('/gallery/'),
   getById: (id: number | string) => axiosInstance.get(`/gallery/${id}/`),
-  update: (id: number | string, data: FormData) => axiosInstance.put(`/gallery/${id}/`, data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
+  update: (id: number | string, data: FormData) => axiosInstance.put(`/gallery/${id}/`, data),
   delete: (id: number | string) => axiosInstance.delete(`/gallery/${id}/`),
 };
 
