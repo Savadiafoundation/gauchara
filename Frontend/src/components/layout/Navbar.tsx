@@ -37,6 +37,8 @@ const Navbar = () => {
     return location.pathname.startsWith(path);
   };
 
+  const isBlogPost = location.pathname.startsWith('/blog/') && location.pathname !== '/blog';
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
@@ -49,15 +51,8 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-4">
             <div className="  rounded-full flex items-center justify-center">
-              {/* <span className="text-primary-foreground font-bold text-xl">G</span> */}
               <img src="/logo.png" alt="logo" className='h-24 w-auto' />
             </div>
-            {/* <span
-              className={`text-2xl font-serif font-bold transition-colors ${isScrolled ? 'text-foreground' : 'text-white'
-                }`}
-            >
-              GauChara
-            </span> */}
           </Link>
 
           {/* Desktop Navigation */}
@@ -70,7 +65,9 @@ const Navbar = () => {
                   ? 'text-primary'
                   : isScrolled
                     ? 'text-foreground'
-                    : 'text-white'
+                    : isBlogPost
+                      ? 'text-primary'
+                      : 'text-white'
                   }`}
               >
                 {link.name}
@@ -94,9 +91,9 @@ const Navbar = () => {
             aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? (
-              <X className={`w-6 h-6 ${isScrolled ? 'text-foreground' : 'text-white'}`} />
+              <X className={`w-6 h-6 ${isScrolled || isBlogPost ? 'text-foreground' : 'text-white'}`} />
             ) : (
-              <Menu className={`w-6 h-6 ${isScrolled ? 'text-foreground' : 'text-white'}`} />
+              <Menu className={`w-6 h-6 ${isScrolled || isBlogPost ? 'text-foreground' : 'text-white'}`} />
             )}
           </button>
         </nav>

@@ -57,6 +57,7 @@ export const donationApi = {
   },
   getAll: () => axiosInstance.get('/donation2/'),
   updateStatus: (id: number | string, data: { payment_status: string }) => axiosInstance.patch(`/donation3/${id}/status/`, data),
+  delete: (id: number | string) => axiosInstance.delete(`/donation3/${id}/`),
   verifyPayPal: (orderId: string) => axiosInstance.post('/donations/verify-paypal', { orderId }),
   uploadProof: async (donationId: string, file: File) => {
     const formData = new FormData();
@@ -157,13 +158,15 @@ export interface Blog {
 
 export interface Cause {
   id: number;
+  _id?: string | number;
   title: string;
   short_description: string;
   full_content: string;
   image: string | null;
   image_file: string | null;
   image_url: string | null;
-  goal_amount: string;
+  goal_amount: string | number;
+  raised_amount?: string | number;
   category: string;
   featured: boolean;
   created_at?: string;

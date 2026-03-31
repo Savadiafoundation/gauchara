@@ -54,13 +54,18 @@ const ManageVolunteers = () => {
         }
     };
 
-    const handleDelete = async (id: number | undefined) => {
-        if (!id) return;
+    const handleDelete = async (id: number | string | undefined) => {
+        console.log("Delete triggered for volunteer ID:", id);
+        if (!id) {
+            toast.error("Invalid volunteer ID");
+            return;
+        }
         try {
             await volunteerApi.delete(id);
-            setVolunteers(volunteers.filter(vol => vol.id !== id));
+            setVolunteers(volunteers.filter(vol => (vol.id || (vol as any)._id) !== id));
             toast.success('Volunteer application deleted successfully');
         } catch (error: any) {
+            console.error("Delete failed:", error);
             toast.error(error.backendError || 'Failed to delete volunteer application');
         }
     };
@@ -179,10 +184,7 @@ const ManageVolunteers = () => {
                                                         <AlertDialogFooter className="pt-6">
                                                             <AlertDialogCancel className="rounded-2xl h-12 font-bold px-8 border-2">Cancel</AlertDialogCancel>
                                                             <AlertDialogAction 
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleDelete(volunteer.id);
-                                                                }} 
+                                                                onClick={() => handleDelete(volunteer.id || (volunteer as any)._id)} 
                                                                 className="bg-red-500 hover:bg-red-600 rounded-2xl h-12 font-bold px-8 shadow-xl shadow-red-500/20 border-none"
                                                             >
                                                                 Delete

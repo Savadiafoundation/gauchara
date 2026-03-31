@@ -8,6 +8,7 @@ import { getImageUrl } from '@/lib/utils';
 import { toast } from 'sonner';
 import PageHero from '@/components/layout/PageHero';
 import { Progress } from '@/components/ui/progress';
+import cowHerd from '@/assets/cow-herd.jpg';
 
 const Causes = () => {
     const [causes, setCauses] = useState<Cause[]>([]);
@@ -182,9 +183,9 @@ const Causes = () => {
                         <div className="relative">
                             <div className="aspect-square rounded-[60px] overflow-hidden shadow-2xl relative z-10 border-8 border-background">
                                 <img 
-                                    src="https://images.unsplash.com/photo-1545468241-1ef703553896?q=80&w=2670&auto=format&fit=crop" 
+                                    src={cowHerd} 
                                     alt="Commitment" 
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
                                 />
                             </div>
                             <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-10 animate-pulse" />

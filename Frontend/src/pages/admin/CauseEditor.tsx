@@ -11,6 +11,13 @@ import { toast } from 'sonner';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 const CauseEditor = () => {
     const { id } = useParams();
@@ -69,6 +76,7 @@ const CauseEditor = () => {
     const fetchCategories = async () => {
         try {
             const res = await causeCategoryApi.getAll();
+            console.log("Cause Categories fetched:", res.data);
             setCategories(res.data);
         } catch (error) {
             console.error("Failed to fetch categories");
@@ -96,16 +104,18 @@ const CauseEditor = () => {
     const handleDeleteCategory = async (catId: number | string, catName: string, e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        console.log("Attempting to delete category:", { id: catId, name: catName });
         if (window.confirm(`Delete category "${catName}"?`)) {
             try {
                 await causeCategoryApi.delete(catId);
-                setCategories(prev => prev.filter(c => (c.id || c._id) !== catId));
+                setCategories(prev => prev.filter(c => (c.id || (c as any)._id) !== catId));
                 if (formData.category === catName) {
                     setFormData(prev => ({ ...prev, category: '' }));
                 }
                 toast.success("Category deleted");
-            } catch (error) {
-                toast.error("Failed to delete category");
+            } catch (error: any) {
+                console.error("Failed to delete category:", error);
+                toast.error(error.backendError || "Failed to delete category");
             }
         }
     };
@@ -209,18 +219,14 @@ const CauseEditor = () => {
                                         <SelectValue placeholder="Select category" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <div className="p-2 border-b mb-2">
+                                        <div className="p-2 border-b mb-2" onKeyDown={(e) => e.stopPropagation()}>
                                             <div className="flex gap-2">
                                                 <Input
                                                     placeholder="New category..."
                                                     value={newCategoryName}
-                                                    onChange={(e) => {
-                                                        e.stopPropagation();
-                                                        setNewCategoryName(e.target.value);
-                                                    }}
+                                                    onChange={(e) => setNewCategoryName(e.target.value)}
                                                     className="h-8 text-sm"
                                                     onKeyDown={(e) => {
-                                                        e.stopPropagation();
                                                         if (e.key === 'Enter') {
                                                             e.preventDefault();
                                                             handleAddCategory();
@@ -233,6 +239,7 @@ const CauseEditor = () => {
                                                     className="h-8 px-2"
                                                     onClick={(e) => {
                                                         e.preventDefault();
+                                                        e.stopPropagation();
                                                         handleAddCategory();
                                                     }}
                                                     disabled={!newCategoryName.trim()}
@@ -242,17 +249,31 @@ const CauseEditor = () => {
                                             </div>
                                         </div>
                                         {categories.map((cat) => (
-                                            <SelectItem key={cat.id || cat._id} value={cat.name} className="group pr-8 relative">
+                                            <SelectItem key={cat.id || (cat as any)._id} value={cat.name} className="group pr-8 relative">
                                                 <div className="flex items-center justify-between w-full min-w-[200px]">
                                                     <span>{cat.name}</span>
-                                                    <div
-                                                        role="button"
-                                                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/10 rounded-md transition-all z-50 cursor-pointer"
-                                                        onClick={(e) => handleDeleteCategory(cat.id || cat._id, cat.name, e)}
-                                                        onPointerDown={(e) => e.stopPropagation()}
-                                                    >
-                                                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                                                    </div>
+                                                        <div
+                                                            role="button"
+                                                            aria-label="Delete category"
+                                                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/10 rounded-md transition-all z-[150] cursor-pointer absolute right-2 top-1/2 -translate-y-1/2 pointer-events-auto"
+                                                            onPointerDownCapture={(e) => {
+                                                                console.log("PointerDownCapture detected on Trash icon");
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                handleDeleteCategory(cat.id || (cat as any)._id, cat.name, e as any);
+                                                            }}
+                                                            onMouseDownCapture={(e) => {
+                                                                console.log("MouseDownCapture detected on Trash icon");
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                            }}
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                            }}
+                                                        >
+                                                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                                        </div>
                                                 </div>
                                             </SelectItem>
                                         ))}

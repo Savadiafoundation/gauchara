@@ -16,7 +16,7 @@ const Index = () => {
       <ImpactCounters />
       {/* Temporarily disabled to debug */}
       {/* <Causes /> */}
-      {/* <Testimonials /> */}
+      <Testimonials />
       <BlogPreview />
       <CTABanner />
       {/* <Sponsors /> */}

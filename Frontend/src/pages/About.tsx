@@ -192,7 +192,7 @@ const About = () => {
               <h2 className="font-display text-3xl md:text-4xl font-bold mt-2 mb-6">
                 Making a Difference Every Day
               </h2>
-              <p className="text-secondary-foreground/80 mb-8 leading-relaxed">
+              <p className="text-foreground/80 mb-8 leading-relaxed font-medium">
                 Through the generous support of our donors and volunteers, we have been
                 able to make a significant impact in the lives of thousands of sacred cows
                 across India.
@@ -204,9 +204,9 @@ const About = () => {
                   { value: "50,000+", label: "Kg Silage Distributed" },
                   { value: "500+", label: "Volunteers" },
                 ].map((stat, index) => (
-                  <div key={index} className="p-4 bg-secondary-foreground/10 rounded-xl">
-                    <div className="text-3xl font-bold text-accent">{stat.value}</div>
-                    <div className="text-sm text-secondary-foreground/70">{stat.label}</div>
+                  <div key={index} className="p-4 bg-muted/50 rounded-2xl border border-border/50 group hover:border-primary/30 transition-all">
+                    <div className="text-3xl font-bold text-primary">{stat.value}</div>
+                    <div className="text-sm font-bold text-foreground/70">{stat.label}</div>
                   </div>
                 ))}
               </div>
