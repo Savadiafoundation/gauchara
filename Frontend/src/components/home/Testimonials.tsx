@@ -52,18 +52,8 @@ const Testimonials = () => {
     }
   }, [testimonials.length, isAnimating]); // Added isAnimating to dependency to pause on manual interaction if needed, but simple interval is fine.
 
-  if (isLoading) {
-    return (
-      <section className="section-padding bg-muted/30">
-        <div className="container-custom flex justify-center">
-          <Loader2 className="w-10 h-10 animate-spin text-primary" />
-        </div>
-      </section>
-    );
-  }
-
-  if (testimonials.length === 0) {
-    return null; // Or render a "No testimonials" message
+  if (isLoading || testimonials.length === 0) {
+    return null;
   }
 
   return (
