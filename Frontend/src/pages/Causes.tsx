@@ -21,7 +21,7 @@ const Causes = () => {
                 setCauses(response.data);
             } catch (error: any) {
                 console.error('Failed to fetch causes:', error);
-                toast.error('Unable to load our impact missions at this time.');
+                toast.error(error.backendError || 'Unable to load our impact missions at this time.');
             } finally {
                 setIsLoading(false);
             }

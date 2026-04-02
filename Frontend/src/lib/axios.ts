@@ -130,18 +130,51 @@ axiosInstance.interceptors.response.use(
             const data = error.response.data as any;
 
             // Extract message from various common backend response formats
-            if (data?.detail) errorMessage = data.detail;
-            else if (data?.error) errorMessage = data.error;
-            else if (data?.message) errorMessage = data.message;
-            else if (data?.non_field_errors) errorMessage = Array.isArray(data.non_field_errors) ? data.non_field_errors[0] : data.non_field_errors;
-            else if (typeof data === 'string') errorMessage = data;
-            else if (typeof data === 'object') {
-                // For validation errors, extract the first field error
-                const firstKey = Object.keys(data)[0];
-                if (firstKey && Array.isArray(data[firstKey])) {
-                    errorMessage = `${firstKey}: ${data[firstKey][0]}`;
-                } else if (firstKey) {
-                    errorMessage = `${firstKey}: ${data[firstKey]}`;
+            if (data?.detail) {
+                errorMessage = data.detail;
+            } else if (data?.error) {
+                errorMessage = typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
+            } else if (data?.errors) {
+                // If there's an 'errors' plural key, it might be a list or object
+                if (Array.isArray(data.errors)) {
+                    errorMessage = data.errors.join(', ');
+                } else if (typeof data.errors === 'object') {
+                    errorMessage = Object.entries(data.errors)
+                        .map(([field, msg]) => `${field}: ${Array.isArray(msg) ? msg.join(', ') : msg}`)
+                        .join(' | ');
+                } else {
+                    errorMessage = data.errors;
+                }
+            } else if (data?.message) {
+                errorMessage = data.message;
+            } else if (data?.non_field_errors) {
+                errorMessage = Array.isArray(data.non_field_errors) ? data.non_field_errors.join(', ') : data.non_field_errors;
+            } else if (typeof data === 'string') {
+                errorMessage = data;
+            } else if (Array.isArray(data)) {
+                errorMessage = data.map(item => 
+                    typeof item === 'string' ? item : (item?.message || item?.detail || JSON.stringify(item))
+                ).join(', ');
+            } else if (typeof data === 'object' && data !== null) {
+                // For validation errors, extract multiple field errors
+                const fieldErrors = Object.entries(data)
+                    .map(([field, msg]) => {
+                        let message = '';
+                        if (Array.isArray(msg)) {
+                            message = msg.map(m => typeof m === 'object' ? JSON.stringify(m) : m).join(', ');
+                        } else if (typeof msg === 'object' && msg !== null) {
+                            message = JSON.stringify(msg);
+                        } else {
+                            message = String(msg);
+                        }
+                        
+                        // Don't show the field name if it's 'detail' or 'error' as it's redundant
+                        if (field === 'detail' || field === 'error' || field === 'message') return message;
+                        return `${field}: ${message}`;
+                    });
+                
+                if (fieldErrors.length > 0) {
+                    errorMessage = fieldErrors.join(' | ');
                 }
             }
         } else if (error.request) {

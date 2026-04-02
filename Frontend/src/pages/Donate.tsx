@@ -30,6 +30,8 @@ const Donate = () => {
     });
 
     const [paymentRegion, setPaymentRegion] = useState<"indian" | "international" | null>(null);
+    const [isReceiptShared, setIsReceiptShared] = useState(false);
+    const [donationRecorded, setDonationRecorded] = useState(false);
 
     // Ensure scroll to top of form on step change
     useEffect(() => {
@@ -85,6 +87,8 @@ const Donate = () => {
         const encodedMessage = encodeURIComponent(message);
         window.open(`https://wa.me/919052590515?text=${encodedMessage}`, '_blank');
         
+        // Mark as shared to enable the "Payment Done" button
+        setIsReceiptShared(true);
         // Also log the intent
         handlePaymentDone(false);
     };
@@ -110,6 +114,8 @@ const Donate = () => {
 
         try {
             await donationApi.create(uploadData);
+            setIsReceiptShared(true);
+            setDonationRecorded(true);
             toast({
                 title: "Screenshot Uploaded",
                 description: "Thank you! Our team will verify the payment and send your receipt within 24 hours.",
@@ -128,6 +134,11 @@ const Donate = () => {
     };
 
     const handlePaymentDone = (redirect = true) => {
+        if (donationRecorded && redirect) {
+            navigate('/');
+            return;
+        }
+
         setIsProcessing(true);
         const amount = customAmount ? parseInt(customAmount) : selectedAmount;
 
@@ -145,6 +156,7 @@ const Donate = () => {
             payment_status: 'pending',
         })
             .then(() => {
+                setDonationRecorded(true);
                 if (redirect) {
                     toast({
                         title: "Donation Recorded",
@@ -512,15 +524,24 @@ const Donate = () => {
                                             <Button type="button" variant="outline" onClick={() => setStep(1)} className="h-16 flex-1 rounded-[20px] font-black uppercase tracking-widest text-xs border-2">
                                                 Another Donation
                                             </Button>
-                                            <Button
-                                                type="button"
-                                                variant="sacred"
-                                                className="h-16 flex-[2] rounded-[20px] text-lg font-black shadow-2xl shadow-primary/20"
-                                                onClick={() => handlePaymentDone()}
-                                                disabled={isProcessing}
-                                            >
-                                                {isProcessing ? "Processing..." : "Payment Done"}
-                                            </Button>
+                                            <div className="flex-[2] flex flex-col gap-2">
+                                                {!isReceiptShared && (
+                                                    <p className="text-[10px] font-black text-primary uppercase tracking-widest animate-pulse">
+                                                        * Please Share Receipt to Enable Button
+                                                    </p>
+                                                )}
+                                                <div className="h-16 w-full">
+                                                    <Button
+                                                        type="button"
+                                                        variant="sacred"
+                                                        className="h-full w-full rounded-[20px] text-lg font-black shadow-2xl shadow-primary/20"
+                                                        onClick={() => handlePaymentDone()}
+                                                        disabled={isProcessing || !isReceiptShared}
+                                                    >
+                                                        {isProcessing ? "Processing..." : "Payment Done"}
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </motion.div>
                                 )}

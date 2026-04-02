@@ -20,7 +20,7 @@ const Programs = () => {
                 setPrograms(response.data);
             } catch (error: any) {
                 console.error('Failed to fetch programs:', error);
-                toast.error('Unable to load programs at this time.');
+                toast.error(error.backendError || 'Unable to load programs at this time.');
             } finally {
                 setIsLoading(false);
             }
