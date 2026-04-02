@@ -48,7 +48,8 @@ const ManageBlogs = () => {
     const fetchBlogs = async () => {
         try {
             const response = await blogApi.getAll();
-            setBlogs(response.data);
+            const data = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+            setBlogs(Array.isArray(data) ? data : []);
         } catch (error: any) {
             toast.error(error.backendError || 'Failed to fetch blogs');
         } finally {
@@ -112,7 +113,7 @@ const ManageBlogs = () => {
                                     </TableRow>
                                 ) : (
                                     blogs.map((blog) => {
-                                        const imageDisplayUrl = getImageUrl(blog.featured_image || blog.featured_image_url) || '/placeholder.svg';
+                                        const imageDisplayUrl = getImageUrl(blog.featured_image || blog.featured_image_url || blog.image_file || blog.image) || '/placeholder.svg';
 
                                         let displayDate = "N/A";
                                         const rawDate = blog.created_at || blog.createdAt || blog.pub_date || blog.updated_at || blog.date || blog.timestamp;
@@ -204,7 +205,7 @@ const ManageBlogs = () => {
                             <div className="bg-primary/5 p-8 border-b border-primary/10">
                                 <div className="max-w-md mx-auto bg-black/5 border border-border/50 rounded-[40px] overflow-hidden shadow-2xl group/prev relative aspect-video flex items-center justify-center">
                                     <img
-                                        src={getImageUrl(selectedBlog.featured_image || selectedBlog.featured_image_url) || '/placeholder.svg'}
+                                        src={getImageUrl(selectedBlog.featured_image || selectedBlog.featured_image_url || selectedBlog.image_file || selectedBlog.image) || '/placeholder.svg'}
                                         alt={selectedBlog.title}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover/prev:scale-[1.05]"
                                     />

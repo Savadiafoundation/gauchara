@@ -51,13 +51,14 @@ const BlogEditor = () => {
                     slug: blog.slug,
                     content: blog.content,
                     excerpt: blog.excerpt,
-                    featured_image: blog.featured_image_url || blog.featured_image,
+                    featured_image: blog.featured_image_url || blog.featured_image || blog.image || blog.image_file,
                     author: typeof blog.author === 'object' ? blog.author.username : (blog.author || 'Admin'),
                 });
 
-                if (blog.featured_image_url || blog.featured_image) {
+                const initialImage = blog.featured_image_url || blog.featured_image || blog.image || blog.image_file;
+                if (initialImage) {
                     setUploadType('url');
-                    setImagePreview(blog.featured_image_url || blog.featured_image);
+                    setImagePreview(initialImage);
                 }
             } else {
                 toast.error('Blog not found');

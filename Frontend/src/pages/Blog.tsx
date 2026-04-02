@@ -52,7 +52,7 @@ const Blog = () => {
             ...post,
             id: post.id || post._id,
             // Use getImageUrl utility for robust URL construction
-            image: getImageUrl(post.featured_image || post.featured_image_url) || '/placeholder.svg',
+            image: getImageUrl(post.featured_image || post.featured_image_url || post.image_file || post.image) || '/placeholder.svg',
             title: post.title || "Untitled Post",
             excerpt: post.excerpt || "No excerpt available",
             date: displayDate,

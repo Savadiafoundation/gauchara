@@ -8,9 +8,18 @@ export function cn(...inputs: ClassValue[]) {
 export function getImageUrl(path: any): string {
   if (!path) return '';
 
-  // If we mistakenly got an object (like a proxy or a File), return empty
+  // If we mistakenly got an object (like a DRF FileField object or similar)
+  if (typeof path === 'object' && path !== null) {
+    // Try common nested URL fields
+    const nestedPath = path.url || path.file || path.path || path.uri;
+    if (nestedPath && typeof nestedPath === 'string') {
+      return getImageUrl(nestedPath);
+    }
+    console.warn('getImageUrl received non-string path object:', path);
+    return '';
+  }
+
   if (typeof path !== 'string') {
-    console.warn('getImageUrl received non-string path:', path);
     return '';
   }
 

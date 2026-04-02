@@ -516,7 +516,7 @@ const Donate = () => {
                                                 type="button"
                                                 variant="sacred"
                                                 className="h-16 flex-[2] rounded-[20px] text-lg font-black shadow-2xl shadow-primary/20"
-                                                onClick={handlePaymentDone}
+                                                onClick={() => handlePaymentDone()}
                                                 disabled={isProcessing}
                                             >
                                                 {isProcessing ? "Processing..." : "Payment Done"}
