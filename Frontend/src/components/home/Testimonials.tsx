@@ -29,28 +29,25 @@ const Testimonials = () => {
   }, []);
 
   const nextSlide = () => {
-    if (isAnimating || testimonials.length === 0) return;
+    if (isAnimating || testimonials.length <= 1) return;
     setIsAnimating(true);
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
   };
 
   const prevSlide = () => {
-    if (isAnimating || testimonials.length === 0) return;
+    if (isAnimating || testimonials.length <= 1) return;
     setIsAnimating(true);
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
   useEffect(() => {
+    if (!isAnimating) return;
     const timer = setTimeout(() => setIsAnimating(false), 500);
     return () => clearTimeout(timer);
-  }, [currentIndex]);
+  }, [currentIndex, isAnimating]);
 
-  useEffect(() => {
-    if (testimonials.length > 0) {
-      const autoPlay = setInterval(nextSlide, 5000);
-      return () => clearInterval(autoPlay);
-    }
-  }, [testimonials.length, isAnimating]); // Added isAnimating to dependency to pause on manual interaction if needed, but simple interval is fine.
+  // Auto-play removed as per user request to keep testimonials static until manually changed
+
 
   if (isLoading || testimonials.length === 0) {
     return null;
@@ -134,41 +131,50 @@ const Testimonials = () => {
             </div>
 
             {/* Navigation */}
-            <div className="flex justify-center gap-4 mt-8">
-              <button
-                onClick={prevSlide}
-                className="w-12 h-12 rounded-full border-2 border-primary text-primary 
-                         hover:bg-primary hover:text-primary-foreground transition-colors
-                         flex items-center justify-center"
-                aria-label="Previous testimonial"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={nextSlide}
-                className="w-12 h-12 rounded-full border-2 border-primary text-primary 
-                         hover:bg-primary hover:text-primary-foreground transition-colors
-                         flex items-center justify-center"
-                aria-label="Next testimonial"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+            {testimonials.length > 1 && (
+              <div className="flex justify-center gap-4 mt-8">
+                <button
+                  onClick={prevSlide}
+                  className="w-12 h-12 rounded-full border-2 border-primary text-primary 
+                           hover:bg-primary hover:text-primary-foreground transition-colors
+                           flex items-center justify-center"
+                  aria-label="Previous testimonial"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="w-12 h-12 rounded-full border-2 border-primary text-primary 
+                           hover:bg-primary hover:text-primary-foreground transition-colors
+                           flex items-center justify-center"
+                  aria-label="Next testimonial"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            )}
 
             {/* Dots */}
-            <div className="flex justify-center gap-2 mt-6">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`w-2.5 h-2.5 rounded-full transition-all ${index === currentIndex
-                    ? 'bg-primary w-8'
-                    : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                    }`}
-                  aria-label={`Go to testimonial ${index + 1}`}
-                />
-              ))}
-            </div>
+            {testimonials.length > 1 && (
+              <div className="flex justify-center gap-2 mt-6">
+                {testimonials.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      if (index !== currentIndex && !isAnimating) {
+                        setIsAnimating(true);
+                        setCurrentIndex(index);
+                      }
+                    }}
+                    className={`w-2.5 h-2.5 rounded-full transition-all ${index === currentIndex
+                      ? 'bg-primary w-8'
+                      : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                      }`}
+                    aria-label={`Go to testimonial ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
