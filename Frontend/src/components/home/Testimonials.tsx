@@ -87,7 +87,7 @@ const Testimonials = () => {
                 {/* Avatar */}
                 <div className="flex-shrink-0">
                   <img
-                    src={getImageUrl(testimonials[currentIndex].image || testimonials[currentIndex].image_file || testimonials[currentIndex].image_url)}
+                    src={getImageUrl(testimonials[currentIndex].image_file || testimonials[currentIndex].image_url || testimonials[currentIndex].image)}
                     alt={testimonials[currentIndex].name}
                     className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover 
                              border-4 border-primary shadow-lg"

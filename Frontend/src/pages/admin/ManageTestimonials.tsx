@@ -115,7 +115,7 @@ const ManageTestimonials = () => {
                                             <div className="flex items-center gap-4">
                                                 <div className="w-10 h-10 rounded-full overflow-hidden bg-muted group-hover:scale-110 transition-transform duration-500 shadow-sm border border-border/50 shrink-0">
                                                     <img
-                                                        src={getImageUrl(testimonial.image) || '/placeholder.svg'}
+                                                        src={getImageUrl(testimonial.image_file || testimonial.image_url || testimonial.image) || '/placeholder.svg'}
                                                         alt={testimonial.name}
                                                         className="w-full h-full object-cover"
                                                         onError={(e) => {
@@ -200,7 +200,7 @@ const ManageTestimonials = () => {
                             <div className="flex items-center gap-6">
                                 <div className="w-20 h-20 rounded-[32px] overflow-hidden bg-muted shadow-2xl border-4 border-white shrink-0 relative group">
                                     <img
-                                        src={getImageUrl(selectedTestimonial.image) || '/placeholder.svg'}
+                                        src={getImageUrl(selectedTestimonial.image_file || selectedTestimonial.image_url || selectedTestimonial.image) || '/placeholder.svg'}
                                         alt={selectedTestimonial.name}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                         onError={(e) => {

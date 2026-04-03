@@ -178,6 +178,8 @@ export interface Testimonial {
   role: string;
   content: string;
   image: string;
+  image_file?: string | null;
+  image_url?: string | null;
   rating: number;
 }
 

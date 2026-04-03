@@ -53,11 +53,12 @@ const TestimonialEditor = () => {
                     name: testimonial.name,
                     role: testimonial.role,
                     content: testimonial.content,
-                    image: testimonial.image,
+                    image: testimonial.image || '',
                     rating: testimonial.rating ? testimonial.rating.toString() : '5',
                 });
-                if (testimonial.image) {
-                    setPreviewUrl(getImageUrl(testimonial.image));
+                const imgSource = testimonial.image_file || testimonial.image_url || testimonial.image;
+                if (imgSource) {
+                    setPreviewUrl(getImageUrl(imgSource));
                 }
                 setIsFetching(false); // Stop loading here
                 return;
@@ -84,8 +85,9 @@ const TestimonialEditor = () => {
                     image: testimonial.image,
                     rating: testimonial.rating ? testimonial.rating.toString() : '5',
                 });
-                if (testimonial.image) {
-                    setPreviewUrl(getImageUrl(testimonial.image));
+                const imgSource = testimonial.image_file || testimonial.image_url || testimonial.image;
+                if (imgSource) {
+                    setPreviewUrl(getImageUrl(imgSource));
                 }
             } else {
                 toast.error('Testimonial not found');
