@@ -109,12 +109,21 @@ const Donate = () => {
                 title: "Screenshot Uploaded",
                 description: "Thank you! Our team will verify the payment and send your receipt within 24 hours.",
             });
-            navigate('/causes');
+            navigate('/donate');
         } catch (err: any) {
             console.error("Upload failed:", err);
+            
+            let errorMessage = "We couldn't upload the screenshot. Please try again or send it via WhatsApp.";
+            if (err.response?.data) {
+                const data = err.response.data;
+                errorMessage = typeof data === 'object' 
+                    ? Object.values(data).flat().join(', ')
+                    : data.toString();
+            }
+
             toast({
                 title: "Upload Failed",
-                description: "We couldn't upload the screenshot. Please try again or send it via WhatsApp.",
+                description: errorMessage,
                 variant: 'destructive',
             });
         } finally {
@@ -151,11 +160,25 @@ const Donate = () => {
                         title: "Donation Recorded",
                         description: "Thank you for your support! Our team will verify the payment.",
                     });
-                    navigate('/causes');
+                    navigate('/donate');
                 }
             })
             .catch(err => {
                 console.error("Donation record failed:", err);
+                
+                let errorMessage = "We couldn't record your donation. Please try again.";
+                if (err.response?.data) {
+                    const data = err.response.data;
+                    errorMessage = typeof data === 'object' 
+                        ? Object.values(data).flat().join(', ')
+                        : data.toString();
+                }
+
+                toast({
+                    title: "Submission Failed",
+                    description: errorMessage,
+                    variant: 'destructive',
+                });
             })
             .finally(() => {
                 setIsProcessing(false);
@@ -190,16 +213,35 @@ const Donate = () => {
                                 { label: 'Details', icon: User },
                                 { label: 'Method', icon: Smartphone },
                                 { label: 'Payment', icon: Heart }
-                            ].map((item, idx) => (
-                                <div key={idx} className="relative z-10 flex flex-col items-center gap-2">
-                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${step > idx + 1 ? 'bg-primary text-white' : step === idx + 1 ? 'bg-primary text-white ring-8 ring-primary/10 scale-110' : 'bg-background border-2 border-muted text-muted-foreground'}`}>
-                                        <item.icon className="w-6 h-6" />
-                                    </div>
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ${step === idx + 1 ? 'text-primary' : 'text-muted-foreground'}`}>
-                                        {item.label}
-                                    </span>
-                                </div>
-                            ))}
+                            ].map((item, idx) => {
+                                const stepNumber = idx + 1;
+                                const isClickable = stepNumber <= step || (step === 1 && formData.full_name && formData.email && formData.phone && (customAmount ? parseInt(customAmount) >= 100 : selectedAmount)) || (step === 2 && paymentRegion);
+
+                                return (
+                                    <button
+                                        key={idx}
+                                        type="button"
+                                        onClick={() => {
+                                            if (stepNumber < step) {
+                                                setStep(stepNumber);
+                                            } else if (stepNumber > step) {
+                                                // reuse next step logic for forward jumps
+                                                if (step === 1) handleNextStep();
+                                                if (step === 2 && stepNumber === 3) handleFinalSubmit();
+                                            }
+                                        }}
+                                        disabled={!isClickable && stepNumber > step}
+                                        className={`relative z-10 flex flex-col items-center gap-2 transition-all duration-300 ${isClickable ? 'cursor-pointer hover:scale-105' : 'cursor-not-allowed opacity-60'}`}
+                                    >
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${step > idx + 1 ? 'bg-primary text-white' : step === idx + 1 ? 'bg-primary text-white ring-8 ring-primary/10 scale-110' : 'bg-background border-2 border-muted text-muted-foreground'}`}>
+                                            <item.icon className="w-6 h-6" />
+                                        </div>
+                                        <span className={`text-[10px] font-black uppercase tracking-widest ${step === idx + 1 ? 'text-primary' : 'text-muted-foreground'}`}>
+                                            {item.label}
+                                        </span>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 
