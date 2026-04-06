@@ -81,17 +81,6 @@ const Donate = () => {
         }, 800);
     };
 
-    const handleWhatsAppClick = () => {
-        const amount = customAmount ? parseInt(customAmount) : selectedAmount;
-        const message = `Hello Savadia Foundation, I've just donated ₹${amount?.toLocaleString()} for Gau Seva. My name is ${formData.full_name}. I'm attaching the screenshot below.`;
-        const encodedMessage = encodeURIComponent(message);
-        window.open(`https://wa.me/919052590515?text=${encodedMessage}`, '_blank');
-        
-        // Mark as shared to enable the "Payment Done" button
-        setIsReceiptShared(true);
-        // Also log the intent
-        handlePaymentDone(false);
-    };
 
     const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -120,7 +109,7 @@ const Donate = () => {
                 title: "Screenshot Uploaded",
                 description: "Thank you! Our team will verify the payment and send your receipt within 24 hours.",
             });
-            navigate('/');
+            navigate('/causes');
         } catch (err: any) {
             console.error("Upload failed:", err);
             toast({
@@ -135,7 +124,7 @@ const Donate = () => {
 
     const handlePaymentDone = (redirect = true) => {
         if (donationRecorded && redirect) {
-            navigate('/');
+            navigate('/donate');
             return;
         }
 
@@ -162,7 +151,7 @@ const Donate = () => {
                         title: "Donation Recorded",
                         description: "Thank you for your support! Our team will verify the payment.",
                     });
-                    navigate('/');
+                    navigate('/causes');
                 }
             })
             .catch(err => {
@@ -489,26 +478,16 @@ const Donate = () => {
                                         </div>
 
                                         {/* Verification Cards */}
-                                        <div className="grid sm:grid-cols-2 gap-6 mb-12 text-left">
-                                            <button 
-                                                type="button"
-                                                onClick={handleWhatsAppClick}
-                                                className="p-8 rounded-[32px] bg-primary/5 border border-primary/10 hover:shadow-xl hover:shadow-primary/5 transition-all text-left group/wa"
-                                            >
-                                                <Phone className="w-8 h-8 mb-6 text-primary group-hover/wa:scale-110 transition-transform" />
-                                                <h4 className="font-black text-lg mb-3">WhatsApp Receipt</h4>
-                                                <p className="text-xs font-medium text-muted-foreground leading-relaxed">Send a screenshot of payment to <span className="font-black text-foreground">+91 9052590515</span>. We will verify and send your receipt.</p>
-                                            </button>
-
+                                        <div className="max-w-md mx-auto mb-12 text-left">
                                             <div className="relative">
-                                                <input 
-                                                    type="file" 
+                                                <input
+                                                    type="file"
                                                     ref={fileInputRef}
                                                     onChange={handleScreenshotUpload}
                                                     accept="image/*"
-                                                    className="hidden" 
+                                                    className="hidden"
                                                 />
-                                                <button 
+                                                <button
                                                     type="button"
                                                     onClick={() => fileInputRef.current?.click()}
                                                     className="w-full h-full p-8 rounded-[32px] bg-accent/5 border border-accent/10 hover:shadow-xl hover:shadow-accent/5 transition-all text-left group/up"
