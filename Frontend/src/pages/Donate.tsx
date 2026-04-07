@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Building2, Shield, Check, Smartphone, User, Mail, Phone, CreditCard as PanIcon, ArrowRight, ArrowLeft, Upload, Copy } from "lucide-react";
+import { Heart, Building2, Shield, Check, Smartphone, User, Mail, Phone, CreditCard as PanIcon, ArrowRight, ArrowLeft, Upload, Copy, QrCode, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +32,7 @@ const Donate = () => {
     const [paymentRegion, setPaymentRegion] = useState<"indian" | "international" | null>(null);
     const [isReceiptShared, setIsReceiptShared] = useState(false);
     const [donationRecorded, setDonationRecorded] = useState(false);
+    const [isQuickDonate, setIsQuickDonate] = useState(false);
 
     // Ensure scroll to top of form on step change
     useEffect(() => {
@@ -138,20 +139,21 @@ const Donate = () => {
         }
 
         setIsProcessing(true);
-        const amount = customAmount ? parseInt(customAmount) : selectedAmount;
+        const amount = isQuickDonate ? 0 : (customAmount ? parseInt(customAmount) : selectedAmount);
 
         donationApi.create({
             final_amount: (amount || 0).toString(),
-            selected_amount: customAmount ? null : selectedAmount,
-            custom_amount: customAmount ? parseInt(customAmount) : null,
+            selected_amount: isQuickDonate ? null : (customAmount ? null : selectedAmount),
+            custom_amount: isQuickDonate ? null : (customAmount ? parseInt(customAmount) : null),
             currency: "INR",
-            full_name: formData.full_name,
-            email: formData.email,
-            whatsapp_number: formData.phone,
+            full_name: formData.full_name || (isQuickDonate ? "Quick Donor" : ""),
+            email: formData.email || (isQuickDonate ? "quick@donor.com" : ""),
+            whatsapp_number: formData.phone || (isQuickDonate ? "0000000000" : ""),
             pan_number: formData.pan,
             payment_method: paymentRegion === 'indian' ? 'upi' : 'swift',
             region: paymentRegion === 'indian' ? 'India' : 'International',
             payment_status: 'pending',
+            is_quick_donation: isQuickDonate
         })
             .then(() => {
                 setDonationRecorded(true);
@@ -256,9 +258,30 @@ const Donate = () => {
                                         exit={{ opacity: 0, x: 20 }}
                                         className="card-sacred p-8 sm:p-12 space-y-10"
                                     >
-                                        <header>
-                                            <h2 className="font-display text-3xl font-black text-foreground mb-2 tracking-tight">Step 1: Basic Information</h2>
-                                            <p className="text-muted-foreground text-sm font-medium">This information ensures your donation receipt is generated correctly.</p>
+                                        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                            <div>
+                                                <h2 className="font-display text-3xl font-black text-foreground mb-2 tracking-tight">Step 1: Basic Information</h2>
+                                                <p className="text-muted-foreground text-sm font-medium">This information ensures your donation receipt is generated correctly.</p>
+                                            </div>
+                                            <button 
+                                                onClick={() => {
+                                                    setIsQuickDonate(true);
+                                                    setPaymentRegion('indian');
+                                                    setStep(3);
+                                                }}
+                                                className="group flex items-center gap-4 p-4 px-6 bg-primary/5 hover:bg-primary/10 border-2 border-primary/20 hover:border-primary/40 rounded-2xl transition-all duration-300 text-left shrink-0"
+                                            >
+                                                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+                                                    <QrCode className="w-6 h-6" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-0.5 flex items-center gap-1">
+                                                        <Zap className="w-3 h-3 fill-primary" />
+                                                        Skip Details
+                                                    </p>
+                                                    <p className="text-sm font-black text-foreground">Quick Scan & Pay</p>
+                                                </div>
+                                            </button>
                                         </header>
 
                                         <div className="space-y-8">
@@ -461,10 +484,13 @@ const Donate = () => {
                                             <Check className="w-10 h-10" />
                                         </div>
                                         <h2 className="font-display text-4xl font-black text-foreground mb-4 italic">
-                                            Scan to Support
+                                            {isQuickDonate ? "Quick Scan & Pay" : "Scan to Support"}
                                         </h2>
-                                        <p className="text-muted-foreground font-medium text-base max-w-sm mx-auto mb-12">
-                                            Please scan the official {paymentRegion === 'indian' ? 'Indian UPI' : 'International'} QR code to donate <span className="font-black text-primary underline decoration-primary/20 underline-offset-4 pointer-events-none">₹{finalAmount.toLocaleString()}</span>.
+                                        <p className="text-muted-foreground font-medium text-base max-w-md mx-auto mb-12">
+                                            {isQuickDonate 
+                                                ? "Simply scan and pay any amount you wish. Your support directly helps our sacred cows."
+                                                : <>Please scan the official {paymentRegion === 'indian' ? 'Indian UPI' : 'International'} QR code to donate <span className="font-black text-primary underline decoration-primary/20 underline-offset-4 pointer-events-none">₹{finalAmount.toLocaleString()}</span>.</>
+                                            }
                                         </p>
 
                                         {/* High-End Scanning Area */}
@@ -542,11 +568,19 @@ const Donate = () => {
                                         </div>
 
                                         <div className="flex flex-col sm:flex-row gap-4">
-                                            <Button type="button" variant="outline" onClick={() => setStep(1)} className="h-16 flex-1 rounded-[20px] font-black uppercase tracking-widest text-xs border-2">
-                                                Another Donation
+                                            <Button 
+                                                type="button" 
+                                                variant="outline" 
+                                                onClick={() => {
+                                                    setStep(1);
+                                                    setIsQuickDonate(false);
+                                                }} 
+                                                className="h-16 flex-1 rounded-[20px] font-black uppercase tracking-widest text-xs border-2"
+                                            >
+                                                {isQuickDonate ? "Back to Details" : "Another Donation"}
                                             </Button>
                                             <div className="flex-[2] flex flex-col gap-2">
-                                                {!isReceiptShared && (
+                                                {!isReceiptShared && !isQuickDonate && (
                                                     <p className="text-[10px] font-black text-primary uppercase tracking-widest animate-pulse">
                                                         * Please Share Receipt to Enable Button
                                                     </p>
@@ -557,9 +591,9 @@ const Donate = () => {
                                                         variant="sacred"
                                                         className="h-full w-full rounded-[20px] text-lg font-black shadow-2xl shadow-primary/20"
                                                         onClick={() => handlePaymentDone()}
-                                                        disabled={isProcessing || !isReceiptShared}
+                                                        disabled={isProcessing || (!isReceiptShared && !isQuickDonate)}
                                                     >
-                                                        {isProcessing ? "Processing..." : "Payment Done"}
+                                                        {isProcessing ? "Processing..." : (isQuickDonate ? "Done! Back Home" : "Payment Done")}
                                                     </Button>
                                                 </div>
                                             </div>
@@ -589,8 +623,10 @@ const Donate = () => {
                                         <div className="relative p-8 bg-black dark:bg-white/10 rounded-[28px] text-white shadow-2xl">
                                             <p className="text-[10px] uppercase tracking-[0.3em] font-black text-white/60 mb-3">Total Contribution</p>
                                             <div className="flex items-baseline gap-2">
-                                                <span className="text-5xl font-black tracking-tighter">₹{finalAmount.toLocaleString()}</span>
-                                                <span className="text-[10px] font-bold uppercase tracking-widest text-white/70">INR</span>
+                                                <span className="text-5xl font-black tracking-tighter">
+                                                    {isQuickDonate ? "Flexible" : `₹${finalAmount.toLocaleString()}`}
+                                                </span>
+                                                {!isQuickDonate && <span className="text-[10px] font-bold uppercase tracking-widest text-white/70">INR</span>}
                                             </div>
                                         </div>
                                     </div>
