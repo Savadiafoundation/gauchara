@@ -19,7 +19,7 @@ const Donate = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [step, setStep] = useState(1);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [selectedAmount, setSelectedAmount] = useState<number | null>(1000);
+    const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
     const [customAmount, setCustomAmount] = useState("");
 
     const [formData, setFormData] = useState({
