@@ -57,7 +57,7 @@ export const donationApi = {
   },
   getAll: () => axiosInstance.get('/donation2/'),
   updateStatus: (id: number | string, data: { payment_status: string }) => axiosInstance.patch(`/donation3/${id}/status/`, data),
-  delete: (id: number | string) => axiosInstance.delete(`/donation3/${id}/`),
+  delete: (id: number | string) => axiosInstance.delete(`/donation2/${id}/`),
   verifyPayPal: (orderId: string) => axiosInstance.post('/donations/verify-paypal', { orderId }),
   uploadProof: async (donationId: string, file: File) => {
     const formData = new FormData();
