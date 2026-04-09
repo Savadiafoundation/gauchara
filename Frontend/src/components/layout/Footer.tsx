@@ -182,7 +182,7 @@ const Footer = () => {
               © {currentYear} Gauchara. All rights reserved.
             </p>
             <p className="text-muted-foreground text-sm flex items-center gap-1">
-              Made with <Heart className="w-4 h-4 text-primary" /> for a better world
+              Powered by SRIA Infotech Pvt. Ltd. <Heart className="w-4 h-4 text-primary" />
             </p>
           </div>
         </div>
