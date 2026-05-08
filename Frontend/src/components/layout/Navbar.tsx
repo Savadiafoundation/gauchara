@@ -86,14 +86,24 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden p-2"
+            className="lg:hidden group flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-current/10 hover:bg-current/5 transition-all"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
+            style={{ color: isScrolled || isBlogPost ? 'inherit' : 'white' }}
           >
             {isMobileMenuOpen ? (
-              <X className={`w-6 h-6 ${isScrolled || isBlogPost ? 'text-foreground' : 'text-white'}`} />
+              <>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Close</span>
+                <X className="w-4 h-4" />
+              </>
             ) : (
-              <Menu className={`w-6 h-6 ${isScrolled || isBlogPost ? 'text-foreground' : 'text-white'}`} />
+              <>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Menu</span>
+                <div className="flex flex-col gap-1">
+                  <div className="w-4 h-0.5 bg-current rounded-full transition-all group-hover:w-3"></div>
+                  <div className="w-4 h-0.5 bg-current rounded-full transition-all"></div>
+                </div>
+              </>
             )}
           </button>
         </nav>

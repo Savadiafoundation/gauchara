@@ -43,14 +43,6 @@ const Donate = () => {
 
     const handleNextStep = () => {
         if (step === 1) {
-            if (!formData.full_name || !formData.email || !formData.phone) {
-                toast({
-                    title: "Missing Information",
-                    description: "Please fill in all required fields.",
-                    variant: "destructive",
-                });
-                return;
-            }
             const amount = customAmount ? parseInt(customAmount) : selectedAmount;
             if (!amount || amount < 100) {
                 toast({
@@ -217,7 +209,7 @@ const Donate = () => {
                                 { label: 'Payment', icon: Heart }
                             ].map((item, idx) => {
                                 const stepNumber = idx + 1;
-                                const isClickable = stepNumber <= step || (step === 1 && formData.full_name && formData.email && formData.phone && (customAmount ? parseInt(customAmount) >= 100 : selectedAmount)) || (step === 2 && paymentRegion);
+                                const isClickable = stepNumber <= step || (step === 1 && (customAmount ? parseInt(customAmount) >= 100 : selectedAmount)) || (step === 2 && paymentRegion);
 
                                 return (
                                     <button
@@ -287,7 +279,7 @@ const Donate = () => {
                                         <div className="space-y-8">
                                             <div className="grid md:grid-cols-2 gap-8 text-left">
                                                 <div className="space-y-3">
-                                                    <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground/80">Full Name *</Label>
+                                                    <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground/80">Full Name</Label>
                                                     <div className="relative group">
                                                         <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                                         <Input
@@ -299,7 +291,7 @@ const Donate = () => {
                                                     </div>
                                                 </div>
                                                 <div className="space-y-3">
-                                                    <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground/80">Email Address *</Label>
+                                                    <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground/80">Email Address</Label>
                                                     <div className="relative group">
                                                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                                         <Input
@@ -315,7 +307,7 @@ const Donate = () => {
 
                                             <div className="grid md:grid-cols-2 gap-8 text-left">
                                                 <div className="space-y-3">
-                                                    <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground/80">WhatsApp Number *</Label>
+                                                    <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground/80">WhatsApp Number</Label>
                                                     <div className="relative group">
                                                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                                         <Input
@@ -388,16 +380,31 @@ const Donate = () => {
                                                 </div>
                                             </div>
 
-                                            <Button
-                                                type="button"
-                                                onClick={handleNextStep}
-                                                variant="sacred"
-                                                size="lg"
-                                                className="w-full h-16 text-xl font-black rounded-2xl shadow-xl shadow-primary/20 hover:shadow-primary/40 group"
-                                            >
-                                                Next: Payment Method
-                                                <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
-                                            </Button>
+                                            <div className="flex flex-col sm:flex-row gap-4">
+                                                <Button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setIsQuickDonate(true);
+                                                        setPaymentRegion('indian');
+                                                        setStep(3);
+                                                    }}
+                                                    variant="outline"
+                                                    size="lg"
+                                                    className="h-16 text-lg font-black rounded-2xl border-2 flex-1"
+                                                >
+                                                    Skip & Quick Donate
+                                                </Button>
+                                                <Button
+                                                    type="button"
+                                                    onClick={handleNextStep}
+                                                    variant="sacred"
+                                                    size="lg"
+                                                    className="h-16 text-lg font-black rounded-2xl shadow-xl shadow-primary/20 hover:shadow-primary/40 group flex-[2]"
+                                                >
+                                                    Next: Payment Method
+                                                    <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+                                                </Button>
+                                            </div>
                                         </div>
                                     </motion.div>
                                 )}
