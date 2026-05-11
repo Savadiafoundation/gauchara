@@ -152,7 +152,7 @@ const Contact = () => {
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="john@example.com"
+                      placeholder="Enter you Email Id here"
                       className={errors.email ? "border-destructive" : ""}
                     />
                     {errors.email && <p className="text-destructive text-sm mt-1">{errors.email}</p>}
@@ -170,7 +170,7 @@ const Contact = () => {
                       type="tel"
                       value={formData.phone}
                       onChange={handleChange}
-                      placeholder="+91 9876543210"
+                      placeholder="Enter you phone number here"
                       className={errors.phone ? "border-destructive" : ""}
                     />
                     {errors.phone && <p className="text-destructive text-sm mt-1">{errors.phone}</p>}

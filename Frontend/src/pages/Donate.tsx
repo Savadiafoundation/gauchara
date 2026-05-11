@@ -105,11 +105,11 @@ const Donate = () => {
             navigate('/donate');
         } catch (err: any) {
             console.error("Upload failed:", err);
-            
+
             let errorMessage = "We couldn't upload the screenshot. Please try again or send it via WhatsApp.";
             if (err.response?.data) {
                 const data = err.response.data;
-                errorMessage = typeof data === 'object' 
+                errorMessage = typeof data === 'object'
                     ? Object.values(data).flat().join(', ')
                     : data.toString();
             }
@@ -159,11 +159,11 @@ const Donate = () => {
             })
             .catch(err => {
                 console.error("Donation record failed:", err);
-                
+
                 let errorMessage = "We couldn't record your donation. Please try again.";
                 if (err.response?.data) {
                     const data = err.response.data;
-                    errorMessage = typeof data === 'object' 
+                    errorMessage = typeof data === 'object'
                         ? Object.values(data).flat().join(', ')
                         : data.toString();
                 }
@@ -255,7 +255,7 @@ const Donate = () => {
                                                 <h2 className="font-display text-3xl font-black text-foreground mb-2 tracking-tight">Step 1: Basic Information</h2>
                                                 <p className="text-muted-foreground text-sm font-medium">This information ensures your donation receipt is generated correctly.</p>
                                             </div>
-                                            <button 
+                                            <button
                                                 onClick={() => {
                                                     setIsQuickDonate(true);
                                                     setPaymentRegion('indian');
@@ -283,7 +283,7 @@ const Donate = () => {
                                                     <div className="relative group">
                                                         <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                                         <Input
-                                                            placeholder="John Doe"
+                                                            placeholder="Enter you Full Name here"
                                                             className="h-14 pl-12 rounded-2xl border-2 focus:border-primary transition-all bg-muted/20 hover:bg-muted/40"
                                                             value={formData.full_name}
                                                             onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
@@ -296,7 +296,7 @@ const Donate = () => {
                                                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                                         <Input
                                                             type="email"
-                                                            placeholder="john@example.com"
+                                                            placeholder="Enter you Email Id here"
                                                             className="h-14 pl-12 rounded-2xl border-2 focus:border-primary transition-all bg-muted/20 hover:bg-muted/40"
                                                             value={formData.email}
                                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -311,7 +311,7 @@ const Donate = () => {
                                                     <div className="relative group">
                                                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                                         <Input
-                                                            placeholder="+91 9876543210"
+                                                            placeholder="Enter you phone number here"
                                                             className="h-14 pl-12 rounded-2xl border-2 focus:border-primary transition-all bg-muted/20 hover:bg-muted/40"
                                                             value={formData.phone}
                                                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -323,7 +323,7 @@ const Donate = () => {
                                                     <div className="relative group">
                                                         <PanIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                                         <Input
-                                                            placeholder="ABCDE1234F"
+                                                            placeholder="Enter you PAN Number here"
                                                             className="h-14 pl-12 rounded-2xl border-2 focus:border-primary transition-all bg-muted/20 hover:bg-muted/40"
                                                             value={formData.pan}
                                                             onChange={(e) => setFormData({ ...formData, pan: e.target.value.toUpperCase() })}
@@ -494,7 +494,7 @@ const Donate = () => {
                                             {isQuickDonate ? "Quick Scan & Pay" : "Scan to Support"}
                                         </h2>
                                         <p className="text-muted-foreground font-medium text-base max-w-md mx-auto mb-12">
-                                            {isQuickDonate 
+                                            {isQuickDonate
                                                 ? "Simply scan and pay any amount you wish. Your support directly helps our sacred cows."
                                                 : <>Please scan the official {paymentRegion === 'indian' ? 'Indian UPI' : 'International'} QR code to donate <span className="font-black text-primary underline decoration-primary/20 underline-offset-4 pointer-events-none">₹{finalAmount.toLocaleString()}</span>.</>
                                             }
@@ -575,13 +575,13 @@ const Donate = () => {
                                         </div>
 
                                         <div className="flex flex-col sm:flex-row gap-4">
-                                            <Button 
-                                                type="button" 
-                                                variant="outline" 
+                                            <Button
+                                                type="button"
+                                                variant="outline"
                                                 onClick={() => {
                                                     setStep(1);
                                                     setIsQuickDonate(false);
-                                                }} 
+                                                }}
                                                 className="h-16 flex-1 rounded-[20px] font-black uppercase tracking-widest text-xs border-2"
                                             >
                                                 {isQuickDonate ? "Back to Details" : "Another Donation"}
